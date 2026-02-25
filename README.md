@@ -66,11 +66,82 @@ powershell -ExecutionPolicy Bypass -File .\setup_llama_cpp_cuda124.ps1
 ```
 
 **Saída esperada:**
-```
+```powershell
 Em qual disco deseja instalar? (Ex: C, D): C
 OK - llama-b8083-bin-win-cuda-12.4-x64.zip baixado
 OK - cudart-llama-bin-win-cuda-12.4-x64.zip baixado
 OK - Instalação completa em C:\llama-cpp-cuda124
+```
+
+### 2. **setup_llama_cpp_cuda12_cuda_13.ps1**
+**Configuração Inteligente do llama.cpp com Detecção Automática de CUDA**
+
+Script avançado que detecta automaticamente a versão de CUDA suportada pelo driver NVIDIA e oferece escolha entre CUDA 12.4 e CUDA 13.1.
+
+**O que faz:**
+- Detecta automaticamente a versão de CUDA via `nvidia-smi`
+- Oferece escolha inteligente baseada no driver instalado:
+  - CUDA 13.1 (b8149) para drivers que suportam CUDA 13.x
+  - CUDA 12.4 (b8083) para drivers compatíveis com CUDA 12.x
+- Download dos binários correspondentes à versão escolhida
+- Mesma instalação e validação que os scripts anteriores
+
+**Quando usar:**
+- Quando você tem drivers NVIDIA recentes e quer a versão mais otimizada
+- Para evitar incompatibilidades entre versões de CUDA
+- Quando não tem certeza qual versão usar
+
+**Uso:**
+```powershell
+powershell -ExecutionPolicy Bypass -File .\setup_llama_cpp_cuda12_cuda_13.ps1
+
+# Saída esperada:
+# CUDA suportado pelo driver (nvidia-smi): 13.1
+# Sugestão com base no driver NVIDIA (nvidia-smi): opção 2
+# Digite 1, 2 ou pressione ENTER para usar a sugestão (2)
+```
+
+**Comparação de versões:**
+| Versão | Binário | Compatibilidade | Recomendado para |
+|--------|---------|----------------|------------------|
+| CUDA 12.4 | b8083 | Drivers mais antigos | Sistemas com drivers CUDA 12.x |
+| CUDA 13.1 | b8149 | Drivers recentes | Sistemas com drivers CUDA 13.x |
+
+### 3. **setup_llama_cpp_cuda12_cuda_13_aria2c.ps1**
+**Configuração com Download Acelerado via aria2c**
+
+Versão do script inteligente com suporte a downloads paralelos e resumíveis via aria2c, ideal para conexões instáveis ou downloads grandes.
+
+**O que faz:**
+- Todas as funcionalidades do script inteligente (detecção automática)
+- Download paralelo com até 16 conexões simultâneas
+- Resumo automático de downloads interrompidos
+- Validação de integridade dos arquivos ZIP
+- Fallback automático para Invoke-WebRequest se aria2c não estiver disponível
+
+**Diferenças principais:**
+- **Mais rápido**: Downloads paralelos com múltiplas conexões
+- **Mais robusto**: Resume downloads automaticamente
+- **Validação**: Verifica tamanho e integridade dos ZIPs
+- **Progresso**: Barra de progresso detalhada do aria2c
+
+**Uso:**
+```powershell
+# Instale aria2c primeiro (opcional, mas recomendado)
+winget install aria2.aria2
+
+# Execute o script
+powershell -ExecutionPolicy Bypass -File .\setup_llama_cpp_cuda12_cuda_13_aria2c.ps1
+```
+
+**Saída esperada:**
+```powershell
+  Iniciando download com aria2c
+  URL: https://github.com/ggml-org/llama.cpp/releases/download/b8149/llama-b8149-bin-win-cuda-13.1-x64.zip
+  Destino: C:\Users\usuario\Downloads\llama-b8149-bin-win-cuda-13.1-x64.zip
+  A barra abaixo é do próprio aria2c (progresso, velocidade, ETA)
+[#0e1234 100%][#1f5678 100%][#2a9bcd 100%][#3def01 100%] 100%  5.2MB/s 0s
+Download concluído com sucesso via aria2c: llama-b8149-bin-win-cuda-13.1-x64.zip
 ```
 
 ---
@@ -293,10 +364,23 @@ Você pode acessar pelo navegador enquanto o servidor está rodando. Esta interf
 - Visualização de respostas em tempo real
 - Teste completo do modelo sem precisar de Cline ou API
 
+**Acesso em Rede Local:**
+
+O servidor agora escuta em todas as interfaces (`0.0.0.0`), permitindo acesso de outros dispositivos na mesma rede:
+
+```
+http://192.168.50.1:8080/  # Substitua pelo IP da sua máquina
+```
+
 **Como acessar:**
 1. Execute: `.\start-llama-server.ps1`
-2. Abra no navegador: `http://127.0.0.1:8080/`
+2. Abra no navegador: `http://127.0.0.1:8080/` (local) ou `http://[SEU-IP]:8080/` (rede)
 3. Comece a conversar com o modelo
+
+**Para descobrir seu IP local:**
+```powershell
+ipconfig | findstr "IPv4"
+```
 
 ---
 
@@ -370,7 +454,94 @@ Template de formatação que adapta as mensagens do chat para o formato esperado
 - `start-llama-server.ps1` quando DeepSeek é selecionado
 - Garante formatação correta das conversas no endpoint `/v1/chat/completions`
 
-### 9. **.continue/continue.config.yaml**
+### 9. **start-llama-server-rtx4050.ps1**
+**Servidor Otimizado para RTX 4050 (6GB VRAM)**
+
+Script especializado que configura o servidor llama.cpp com otimizações específicas para GPUs RTX 4050 com 6GB de VRAM, incluindo Flash Attention e gerenciamento avançado de memória.
+
+**O que faz:**
+- **Flash Attention**: Reduz consumo de VRAM em ~40% no cache KV e aumenta velocidade
+- **KV Cache Quantizado**: Usa q8_0 para reduzir VRAM em ~50% vs FP16 com qualidade próxima
+- **GPU Layer Offload Total**: Move todas as camadas do modelo para a GPU (n-gpu-layers 99)
+- **Context Window Ajustado**: DeepSeek usa 8192 tokens para caber nos 6GB da RTX 4050
+- **Batching Otimizado**: Batch size maior (2048) para melhor throughput na GPU
+- **Paralelismo Inteligente**: 1 slot para Cline (single-user) com batching continuo
+
+**Configurações por modelo (RTX 4050 6GB):**
+
+| Modelo | Context | VRAM Est. | GPU Layers | KV Cache | Otimizações |
+|--------|---------|-----------|------------|----------|-------------|
+| **Qwen2.5 0.5B** | 16384 | ~0.8 GB | 99 | q8_0 | Offload total, Flash Attention |
+| **DeepSeek 6.7B** | 8192 | ~5.8 GB | 99 | q8_0 | Context reduzido, Flash Attention |
+
+**Parâmetros críticos RTX 4050:**
+```powershell
+# Flash Attention (requer Ada Lovelace cc 8.9 - RTX 4050 suporta)
+--flash-attn
+
+# KV cache quantizado (economiza ~50% VRAM)
+--cache-type-k q8_0
+--cache-type-v q8_0
+
+# Offload total para GPU
+--n-gpu-layers 99
+
+# Batch maior para melhor uso dos Tensor Cores
+--batch-size 2048
+--ubatch-size 512
+
+# Paralelismo single-user (Cline)
+--parallel 1
+--cont-batching
+```
+
+**Quando usar:**
+- GPU RTX 4050 (Ada Lovelace, 6GB VRAM)
+- Quer máximo desempenho com Flash Attention
+- Precisa gerenciar VRAM de forma inteligente
+- Usa principalmente Cline (single-user)
+
+**Uso:**
+```powershell
+powershell -ExecutionPolicy Bypass -File .\start-llama-server-rtx4050.ps1
+
+# Selecione:
+# [1] Qwen2.5 Coder 0.5B (rápido, leve)
+# [2] DeepSeek Coder 6.7B (mais capaz, mais lento)
+
+# Output esperado:
+# Otimizações RTX 4050 ativas:
+#   --n-gpu-layers 99 -> offload TOTAL do modelo para a GPU
+#   --flash-attn -> Flash Attention ativo (Ada Lovelace suportado)
+#   --cache-type-k/v q8_0 -> KV cache quantizado em 8 bits (-50% VRAM vs FP16)
+```
+
+**Monitoramento RTX 4050:**
+```powershell
+# Uso da GPU em tempo real
+nvidia-smi -l 1
+
+# Detalhes de VRAM e utilização
+nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.free --format=csv -l 2
+
+# Métricas do llama.cpp
+curl http://127.0.0.1:8080/metrics
+
+# Logs ao vivo
+Get-Content $env:TEMP\llama-server-rtx.log -Tail 50 -Wait
+```
+
+**Comparação com start-llama-server.ps1:**
+| Feature | start-llama-server.ps1 | start-llama-server-rtx4050.ps1 |
+|---------|------------------------|--------------------------------|
+| **Flash Attention** | Não | Sim (Ada Lovelace) |
+| **KV Cache** | FP16 | q8_0 (50% menos VRAM) |
+| **GPU Layers** | Configurável | 99 (total) |
+| **Context DeepSeek** | 16384 | 8192 (ajustado para 6GB) |
+| **Batch Size** | 512 | 2048 (otimizado GPU) |
+| **VRAM Est. DeepSeek** | ~12GB | ~5.8GB |
+
+### 10. **.continue/continue.config.yaml**
 **Configuração Pré-Configurada para Continue.dev**
 
 Arquivo de configuração YAML que define automaticamente o servidor llama.cpp local para uso com a extensão Continue.dev no VS Code.
@@ -410,14 +581,23 @@ models:
    winget install aria2.aria2
    ```
 
-2. **Instalar llama.cpp com CUDA** (escolha um):
+2. **Instalar llama.cpp com CUDA** (escolha inteligente):
    ```powershell
-   # Opção 1: Download padrão
-   .\setup_llama_cpp_cuda124.ps1
+   # Opção recomendada: Detecção automática de versão
+   .\setup_llama_cpp_cuda12_cuda_13.ps1
    
-   # Opção 2: Download rápido com aria2c
-   .\setup_llama_cpp_cuda124_aria2c.ps1
+   # Ou com downloads acelerados:
+   .\setup_llama_cpp_cuda12_cuda_13_aria2c.ps1
+   
+   # Opções tradicionais (se preferir):
+   .\setup_llama_cpp_cuda124.ps1          # CUDA 12.4 fixo
+   .\setup_llama_cpp_cuda124_aria2c.ps1   # CUDA 12.4 com aria2c
    ```
+
+   **Escolha da versão de CUDA:**
+   - **CUDA 13.1**: Drivers NVIDIA recentes (RTX 40xx, drivers 550+)
+   - **CUDA 12.4**: Drivers mais antigos ou compatibilidade garantida
+   - O script inteligente detecta automaticamente a versão suportada pelo seu driver
 
 3. **Fazer download dos modelos**:
    ```powershell
@@ -431,10 +611,19 @@ models:
 
 4. **Iniciar o servidor** (em um terminal):
    ```powershell
+   # Para uso geral:
    .\start-llama-server.ps1
+   
+   # Para RTX 4050 (6GB VRAM) - máximo desempenho:
+   .\start-llama-server-rtx4050.ps1
+   
    # Selecione o modelo desejado
    # Servidor estará em http://127.0.0.1:8080
    ```
+
+   **Escolha do script de servidor:**
+   - **start-llama-server.ps1**: Uso geral, compatível com todas as GPUs
+   - **start-llama-server-rtx4050.ps1**: Otimizado para RTX 4050, Flash Attention, gerenciamento avançado de VRAM
 
 5. **Usar no Cline** (VS Code):
    - Abra as configurações do Cline
