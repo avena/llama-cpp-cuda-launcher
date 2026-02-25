@@ -1,0 +1,14 @@
+# Continue.dev Configuration - DeepSeek Coder 6.7B Local
+# Docs: https://docs.continue.dev/reference
+
+name: DeepSeek Coder 6.7B
+version: 1.0.0
+schema: v1
+
+# === MODELS ===
+models:
+  - name: DeepSeek Coder Local
+    provider: openai
+    model: deepseek-coder-6.7b-instruct-q4_k_m.gguf
+    apiBase: http://127.0.0.1:8080/v1
+    apiKey: sk-no-key-required
