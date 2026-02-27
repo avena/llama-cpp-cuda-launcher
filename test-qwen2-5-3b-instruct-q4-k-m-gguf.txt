@@ -1,0 +1,77 @@
+================================================================================
+TEST REPORT — llama.cpp API
+================================================================================
+Timestamp    : 2026-02-27 16:22:56
+Model        : Qwen2.5-3B-Instruct-Q4_K_M.gguf
+Server URL   : http://192.168.50.1:8080
+Temperature  : 0.2
+Max Tokens   : 2048
+--------------------------------------------------------------------------------
+PROMPT
+--------------------------------------------------------------------------------
+[INST] You are a precise coding assistant. Write a Python function to filter even numbers [/INST]
+--------------------------------------------------------------------------------
+RESPONSE
+--------------------------------------------------------------------------------
+Certainly! Below is a simple Python function that filters out the even numbers from a given list:
+
+```python
+def filter_even_numbers(numbers):
+    """
+    This function takes in a list of integers and returns only those which are even.
+    
+    :param numbers: List[int]
+        A list containing integer values.
+    :return:
+        filtered_list (List[int])
+            Returns the same list with all odd elements removed, keeping only the even ones.
+    """
+    # Use list comprehension to filter out non-even numbers
+    return [num for num in numbers if num % 2 == 0]
+
+# Example usage:
+example_numbers = [1, 2, 3, 4, 5, 6]
+filtered_list = filter_even_numbers(example_numbers)
+print(filtered_list)  # Output: [2, 4, 6]
+```
+
+### Explanation:
+
+- The function `filter_even_numbers` takes a list of integers as input.
+- It uses a **list comprehension** to iterate over each number in the provided list and checks if it is even using the condition `num % 2 == 0`.
+- If the number satisfies this condition, it gets included in the new list; otherwise, it's excluded.
+
+### Example Usage:
+
+```python
+example_numbers = [1, 2, 3, 4, 5, 6]
+filtered_list = filter_even_numbers(example_numbers)
+print(filtered_list)  # Output: [2, 4, 6]
+
+# Another example:
+another_example = [-7, -8, 0, 9, 10]
+resulting_filtered = filter_even_numbers(another_example)
+print(resulting_filtered)  # Output: [-8, 0, 10]
+```
+
+This function will work for any list of integers and return a new list containing only the even numbers.
+--------------------------------------------------------------------------------
+PERFORMANCE METRICS
+--------------------------------------------------------------------------------
+Reading (Prompt)
+  Tokens   : 29
+  Time     : 0 ms
+  Speed    : 0 t/s
+
+Generation
+  Tokens   : 381
+  Time     : 7300 ms
+  Speed    : 52.19 t/s
+
+Total inference  : 7300 ms
+Wall clock       : 7.3 s
+Stop reason      : stop
+  ✔  Terminou naturalmente
+Stopping word    : 
+================================================================================
+

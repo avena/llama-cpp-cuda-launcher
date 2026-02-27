@@ -1,7 +1,7 @@
 # Continue.dev Configuration - DeepSeek Coder 6.7B Local
 # Docs: https://docs.continue.dev/reference
 
-name: DeepSeek Coder 6.7B
+name: Local Model Config
 version: 1.0.0
 schema: v1
 
@@ -10,5 +10,10 @@ models:
   - name: DeepSeek Coder Local
     provider: openai
     model: deepseek-coder-6.7b-instruct-q4_k_m.gguf
-    apiBase: http://127.0.0.1:8080/v1
+    apiBase: ${{ secrets.LLAMA_SERVER_URL }}
+    apiKey: sk-no-key-required
+  - name: Qwen2.5 3B Instruct
+    provider: openai
+    model: qwen2.5-3b-instruct-q4_k_m.gguf
+    apiBase: ${{ secrets.LLAMA_SERVER_URL }}
     apiKey: sk-no-key-required

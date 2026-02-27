@@ -4,8 +4,17 @@
 # /completion        -> endpoint raw com template manual
 # /v1/chat/completions -> endpoint OpenAI (usado pelo Cline)
 
+# Carregar configuracoes do .env se existir
+if (Test-Path "$PSScriptRoot\.env") {
+    Get-Content "$PSScriptRoot\.env" | ForEach-Object {
+        if ($_ -match '^\s*([^#=]+)\s*=\s*(.*)$') {
+            [Environment]::SetEnvironmentVariable($matches[1].Trim(), $matches[2].Trim(), "Process")
+        }
+    }
+}
+
 $MODEL       = 'deepseek-coder-6.7b-instruct-q4_k_m.gguf'
-$BASE_URL    = 'http://127.0.0.1:8080'
+$BASE_URL    = if ($env:LLAMA_SERVER_URL) { $env:LLAMA_SERVER_URL } else { 'http://127.0.0.1:8080' }
 $TEMPERATURE = 0.1
 $MAX_TOKENS  = 300
 $RESULT_FILE = Join-Path $PSScriptRoot 'test-deepseek-result.txt'

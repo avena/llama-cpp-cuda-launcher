@@ -1,0 +1,436 @@
+# start-llama-server.ps1
+# Inicia o servidor llama.cpp como API compativel com OpenAI para uso com Cline no VS Code
+# v2.2 - Acesso local e LAN simultaneo (sem menu de rede, sem bloco de firewall)
+
+# ============================================================================
+# CATALOGO DE MODELOS
+# ============================================================================
+
+$MODELS = @(
+    @{
+        Name          = 'Qwen2.5 Coder 0.5B (rapido, leve)'
+        Path          = 'C:\models-ai\qwen2.5-coder-0.5b-instruct\qwen2.5-coder-0.5b-instruct-q4_k_m.gguf'
+        ID            = 'qwen2.5-coder-0.5b-instruct-q4_k_m.gguf'
+        Context       = 16384
+        Template      = 'qwen'
+        DefaultTemp   = 0.4
+        DefaultRepeat = 1.3
+        GpuLayers     = 999
+        MaxTokens     = 512
+    },
+    @{
+        Name          = 'DeepSeek Coder 6.7B (mais capaz, mais lento)'
+        Path          = 'C:\models-ai\deepseek-coder-6.7b-instruct\deepseek-coder-6.7b-instruct-q4_k_m.gguf'
+        ID            = 'deepseek-coder-6.7b-instruct-q4_k_m.gguf'
+        Context       = 16384
+        Template      = 'deepseek-coder-chat-template.jinja'
+        DefaultTemp   = 0.1
+        DefaultRepeat = 1.1
+        GpuLayers     = 35
+        MaxTokens     = 2048
+    },
+    @{
+        Name          = 'Qwen2.5 3B Instruct (equilibrio velocidade/qualidade)'
+        Path          = 'C:\models-ai\qwen2.5-3b-instruct\Qwen2.5-3B-Instruct-Q4_K_M.gguf'
+        ID            = 'qwen2.5-3b-instruct-q4_k_m.gguf'
+        Context       = 32768
+        Template      = 'chatml'
+        DefaultTemp   = 0.35
+        DefaultRepeat = 1.2
+        GpuLayers     = 999
+        MaxTokens     = 2048
+    }
+)
+
+# ============================================================================
+# CONFIGURACOES GERAIS
+# ============================================================================
+
+$PORT     = 8080
+$API_HOST = '0.0.0.0'   # Escuta em todas as interfaces: local + LAN simultaneamente
+$LOG_FILE = "$env:TEMP\llama-server.log"
+
+# ============================================================================
+# DETECTAR IP LOCAL PARA EXIBIR AO USUARIO
+# ============================================================================
+
+$localIP = (Get-NetIPAddress -AddressFamily IPv4 |
+    Where-Object { $_.InterfaceAlias -notlike '*Loopback*' -and $_.PrefixOrigin -ne 'WellKnown' } |
+    Select-Object -First 1).IPAddress
+
+# ============================================================================
+# FUNCOES AUXILIARES
+# ============================================================================
+
+function Show-ModelMenu {
+    Write-Host ''
+    Write-Host '╔══════════════════════════════════════════╗' -ForegroundColor Cyan
+    Write-Host '║       Selecao de Modelo llama.cpp        ║' -ForegroundColor Cyan
+    Write-Host '╚══════════════════════════════════════════╝' -ForegroundColor Cyan
+    Write-Host ''
+
+    for ($i = 0; $i -lt $script:MODELS.Count; $i++) {
+        $m      = $script:MODELS[$i]
+        $exists = Test-Path $m.Path
+        $status = if ($exists) { '[OK]' } else { '[NAO ENCONTRADO]' }
+        $color  = if ($exists) { 'White' } else { 'Red' }
+        Write-Host "  [$($i + 1)] $($m.Name)" -ForegroundColor $color
+        Write-Host "       $status  $($m.Path)" -ForegroundColor Gray
+        Write-Host ''
+    }
+
+    $selected = $null
+    do {
+        $choice = Read-Host "Digite o numero do modelo (1-$($script:MODELS.Count))"
+        $idx    = 0
+        $parsed = [int]::TryParse($choice, [ref]$idx)
+
+        if ($parsed -and $idx -ge 1 -and $idx -le $script:MODELS.Count) {
+            $candidate = $script:MODELS[$idx - 1]
+            if (Test-Path $candidate.Path) {
+                $selected = $candidate
+            } else {
+                Write-Host 'ERROR: Arquivo do modelo nao encontrado. Escolha outro.' -ForegroundColor Red
+            }
+        } else {
+            Write-Host "ERROR: Digite um numero entre 1 e $($script:MODELS.Count)." -ForegroundColor Red
+        }
+    } while ($null -eq $selected)
+
+    return $selected
+}
+
+function Get-ValidNumber {
+    param(
+        [string]$Prompt,
+        [string]$Description,
+        [double]$MinValue,
+        [double]$MaxValue,
+        [double]$DefaultValue,
+        [int]$DecimalPlaces = 2
+    )
+
+    Write-Host ''
+    Write-Host $Description -ForegroundColor Cyan
+    Write-Host "Range permitido: $MinValue a $MaxValue" -ForegroundColor Gray
+    Write-Host "Valor padrao: $DefaultValue (pressione Enter para usar)" -ForegroundColor Gray
+    Write-Host 'Aceita ponto ou virgula como decimal' -ForegroundColor Gray
+    Write-Host ''
+
+    do {
+        $raw = Read-Host $Prompt
+
+        if ([string]::IsNullOrWhiteSpace($raw)) {
+            Write-Host "Usando valor padrao: $DefaultValue" -ForegroundColor Green
+            return $DefaultValue
+        }
+
+        $norm  = $raw.Replace(',', '.')
+        $value = 0.0
+        $ok    = [double]::TryParse(
+            $norm,
+            [System.Globalization.NumberStyles]::Any,
+            [System.Globalization.CultureInfo]::InvariantCulture,
+            [ref]$value
+        )
+
+        if ($ok) {
+            if ($value -ge $MinValue -and $value -le $MaxValue) {
+                $r = [math]::Round($value, $DecimalPlaces)
+                Write-Host "Valor aceito: $r" -ForegroundColor Green
+                return $r
+            } else {
+                Write-Host "ERROR: Valor fora do range. Digite entre $MinValue e $MaxValue." -ForegroundColor Red
+            }
+        } else {
+            Write-Host 'ERROR: Digite um numero valido.' -ForegroundColor Red
+        }
+    } while ($true)
+}
+
+# ============================================================================
+# SELECAO DO MODELO
+# ============================================================================
+
+$MODEL = Show-ModelMenu
+
+Write-Host ''
+Write-Host "Modelo selecionado: $($MODEL.Name)" -ForegroundColor Green
+Write-Host ''
+
+# ============================================================================
+# PARAMETROS DE GERACAO
+# ============================================================================
+
+Write-Host 'Configuracao de Parametros de Geracao' -ForegroundColor Cyan
+Write-Host '======================================' -ForegroundColor Cyan
+
+$TEMPERATURE = Get-ValidNumber `
+    -Prompt 'Digite a temperatura' `
+    -Description 'TEMPERATURA: Controla a criatividade/aleatoriedade das respostas.' `
+    -MinValue 0.0 `
+    -MaxValue 2.0 `
+    -DefaultValue $MODEL.DefaultTemp `
+    -DecimalPlaces 2
+
+$REPEAT_PENALTY = Get-ValidNumber `
+    -Prompt 'Digite a penalidade de repeticao' `
+    -Description 'REPEAT PENALTY: Evita repeticoes e loops de texto.' `
+    -MinValue 1.0 `
+    -MaxValue 2.0 `
+    -DefaultValue $MODEL.DefaultRepeat `
+    -DecimalPlaces 2
+
+# ============================================================================
+# VERIFICACOES PREVIAS
+# ============================================================================
+
+if (!(Get-Command 'llama-server.exe' -ErrorAction SilentlyContinue)) {
+    Write-Error 'llama-server.exe nao encontrado no PATH do sistema'
+    Write-Host 'Adicione o diretorio do llama.cpp ao PATH e tente novamente.'
+    exit 1
+}
+
+# ============================================================================
+# INICIO DO SERVIDOR
+# ============================================================================
+
+Write-Host ''
+Write-Host 'Iniciando API llama.cpp...'
+Write-Host "Modelo: $($MODEL.Path)"
+Write-Host "ID do modelo: $($MODEL.ID)"
+Write-Host "GPU Layers: $($MODEL.GpuLayers)"
+Write-Host "Arquivo de log: $LOG_FILE"
+Write-Host ''
+
+$processArgs = @(
+    '-m', $MODEL.Path,
+    '--host', $API_HOST,
+    '--port', $PORT,
+    '-c', $MODEL.Context,
+    '-t', $([Environment]::ProcessorCount),
+    '-ngl', $MODEL.GpuLayers,
+    '-fa', 'on',
+    '--log-disable',
+    '--embedding',
+    '--metrics',
+    '--batch-size', '512',
+    '--ubatch-size', '512',
+    '--temp', $TEMPERATURE.ToString('F2', [System.Globalization.CultureInfo]::InvariantCulture),
+    '--repeat-penalty', $REPEAT_PENALTY.ToString('F2', [System.Globalization.CultureInfo]::InvariantCulture)
+)
+
+if ($MODEL.Template -ne 'auto') {
+    if ($MODEL.Template -like '*.jinja') {
+        $templatePath = Join-Path $PSScriptRoot $MODEL.Template
+        if (!(Test-Path $templatePath)) {
+            Write-Error "Arquivo de template nao encontrado: $templatePath"
+            exit 1
+        }
+        $processArgs += '--chat-template-file'
+        $processArgs += $templatePath
+    } else {
+        $processArgs += '--chat-template'
+        $processArgs += $MODEL.Template
+    }
+}
+
+$process = Start-Process -FilePath 'llama-server.exe' `
+    -ArgumentList $processArgs `
+    -NoNewWindow `
+    -PassThru `
+    -RedirectStandardError $LOG_FILE
+
+Write-Host "Processo iniciado (PID: $($process.Id))"
+Write-Host 'Aguardando servidor ficar pronto (maximo 60 segundos)...'
+Write-Host ''
+
+# ============================================================================
+# HEALTH CHECK
+# ============================================================================
+
+$ready   = $false
+$timeout = 60
+
+for ($i = 1; $i -le $timeout; $i++) {
+    try {
+        $resp = Invoke-WebRequest -Uri "http://127.0.0.1`:$PORT/health" `
+            -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
+        if ($resp.StatusCode -eq 200) {
+            $ready = $true
+            break
+        }
+    } catch {
+        Write-Host "  Aguardando... ($i/$timeout)" -ForegroundColor Gray
+        Start-Sleep -Seconds 1
+    }
+}
+
+# ============================================================================
+# SAIDA FINAL
+# ============================================================================
+
+if ($ready) {
+    Write-Host ''
+    Write-Host '=== SERVIDOR PRONTO PARA USO ===' -ForegroundColor Green
+    Write-Host ''
+    Write-Host "Modelo ativo: $($MODEL.Name)" -ForegroundColor Yellow
+    Write-Host ''
+    Write-Host 'Endpoints - este PC:'
+    Write-Host "  http://127.0.0.1`:$PORT"
+    Write-Host "  http://127.0.0.1`:$PORT/v1"
+    if ($localIP) {
+        Write-Host ''
+        Write-Host 'Endpoints - outros PCs na LAN:' -ForegroundColor Cyan
+        Write-Host "  http://$localIP`:$PORT" -ForegroundColor Cyan
+        Write-Host "  http://$localIP`:$PORT/v1" -ForegroundColor Cyan
+    }
+    Write-Host ''
+    Write-Host 'Parametros de geracao aplicados:'
+    Write-Host "  Temperature:      $TEMPERATURE"
+    Write-Host "  Repeat Penalty:   $REPEAT_PENALTY"
+    Write-Host "  GPU Layers:       $($MODEL.GpuLayers)"
+    Write-Host "  Flash Attention:  on"
+    Write-Host ''
+    Write-Host 'Configuracao para o Cline/Continue no VS Code:'
+    Write-Host "  API Provider:     OpenAI Compatible"
+    Write-Host "  Base URL (local): http://127.0.0.1`:$PORT/v1"
+    if ($localIP) {
+        Write-Host "  Base URL (LAN):   http://$localIP`:$PORT/v1" -ForegroundColor Cyan
+    }
+    Write-Host '  API Key:          sk-no-key-required'
+    Write-Host "  Model:            $($MODEL.ID)"
+    Write-Host "  Max Tokens:       $($MODEL.MaxTokens)"
+    Write-Host "  Temperature:      $TEMPERATURE"
+    Write-Host ''
+    Write-Host 'Comandos uteis:'
+    Write-Host '  Parar servidor:   Get-Process llama-server | Stop-Process'
+    Write-Host "  Ver logs:         Get-Content $LOG_FILE -Tail 50 -Wait"
+    Write-Host "  Testar local:     curl http://127.0.0.1`:$PORT/health"
+    if ($localIP) {
+        Write-Host "  Testar LAN:       curl http://$localIP`:$PORT/health"
+    }
+} else {
+    Write-Host ''
+    Write-Host 'AVISO: Servidor nao respondeu no tempo esperado.' -ForegroundColor Yellow
+    Write-Host "Verifique o log: Get-Content $LOG_FILE"
+    Write-Host ''
+    Write-Host 'Possiveis causas:'
+    Write-Host "  - Porta $PORT ja em uso (netstat -ano | findstr :$PORT)"
+    Write-Host '  - OOM de VRAM: reduza GpuLayers no catalogo $MODELS'
+    Write-Host '  - DLLs do CUDA nao encontradas no PATH'
+    Write-Host '  - Flash Attention incompativel: troque -fa on por -fa auto no $processArgs'
+}
+
+# ============================================================================
+# TABELA DE REFERENCIA: MODELOS DISPONIVEIS
+# ============================================================================
+#
+# Modelo                              Params  VRAM(Q4)  GpuLayers  MaxTokens  Velocidade
+# qwen2.5-coder-0.5b Q4_K_M          0.5B    ~1 GB     999(full)  512        Muito rap.
+# qwen2.5-3b-instruct Q4_K_M         3B      ~2 GB     999(full)  2048       Rapida
+# deepseek-coder-6.7b Q4_K_M         6.7B    ~4.2 GB   35(full)   2048       Moderada
+#
+# ============================================================================
+# TABELA DE REFERENCIA: PARAMETROS DE GERACAO
+# ============================================================================
+#
+# TEMPERATURA
+# -----------
+# Valor     Comportamento                       Quando Usar
+# 0.0-0.3   Respostas deterministicas, focadas  Codigo, fatos, instrucoes precisas
+# 0.4-0.6   Equilibrio foco/criatividade        Uso geral, assistente de programacao
+# 0.7-1.0   Mais criativo, pode divagar         Brainstorming, texto criativo
+# > 1.0     Muito aleatorio, imprevisivel       Experimental, nao recomendado
+#
+# REPEAT PENALTY
+# --------------
+# Valor     Comportamento                       Quando Usar
+# 1.0       Sem penalidade, pode repetir muito  Nao recomendado
+# 1.1-1.3   Penalidade leve, evita loops        Uso geral, recomendado padrao
+# 1.4-1.6   Penalidade moderada, mais variado   Quando houver repeticao excessiva
+# > 1.7     Penalidade forte, pode prejudicar   Casos especificos graves
+#
+# COMBINACOES RECOMENDADAS
+# ------------------------
+# Para programacao:    Temperature 0.2-0.4  |  Repeat Penalty 1.2-1.3
+# Para conversas:      Temperature 0.4-0.6  |  Repeat Penalty 1.1-1.2
+#
+# ============================================================================
+# DICAS DE USO
+# ============================================================================
+#
+# 1. TROCAR DE MODELO SEM REINICIAR O CLINE:
+#    - Pare o servidor:  Get-Process llama-server | Stop-Process
+#    - Execute o script novamente e escolha outro modelo
+#    - No Cline, atualize o campo Model com o novo ID
+#
+# 2. VERIFICAR QUAL MODELO ESTA ATIVO:
+#    - Acesse: http://127.0.0.1:8080/v1/models
+#    - O campo id mostra o nome exato do modelo carregado
+#
+# 3. SE O DEEPSEEK NAO CARREGAR (OOM de VRAM):
+#    - Reduza GpuLayers para 28 no catalogo $MODELS
+#    - Ou reduza Context para 4096
+#    - Ou use o Qwen 3B como alternativa
+#
+# 4. SE O FLASH ATTENTION CAUSAR ERRO:
+#    - Troque '-fa', 'on' por '-fa', 'auto' no $processArgs
+#    - Ou remova o par '-fa', 'on' completamente para desativar
+#
+# 5. ADICIONAR NOVOS MODELOS AO MENU:
+#    - Adicione um bloco @{ } ao array $MODELS no topo do script
+#    - Campos obrigatorios: Name, Path, ID, Context, Template,
+#                           DefaultTemp, DefaultRepeat, GpuLayers, MaxTokens
+#    - Templates validos: qwen, chatml, deepseek, llama3, phi3, gemma
+#
+# ============================================================================
+# COMANDOS UTEIS PARA MANUTENCAO
+# ============================================================================
+#
+# Verificar modelo ativo e status:
+#   curl http://127.0.0.1:8080/health
+#   curl http://127.0.0.1:8080/v1/models
+#
+# Ver logs em tempo real:
+#   Get-Content $env:TEMP\llama-server.log -Tail 20 -Wait
+#
+# Parar o servidor:
+#   Get-Process llama-server -ErrorAction SilentlyContinue | Stop-Process
+#
+# Verificar processos na porta 8080:
+#   netstat -ano | findstr :8080
+#
+# Liberar porta ocupada:
+#   taskkill /PID <PID> /F
+#
+# ============================================================================
+# SOLUCAO DE PROBLEMAS
+# ============================================================================
+#
+# PROBLEMA: Model not found no Cline
+# SOLUCAO:  Use exatamente o ID retornado por /v1/models, incluindo .gguf
+#
+# PROBLEMA: Outro PC nao consegue acessar a API
+# SOLUCAO:  1. Crie a regra de firewall manualmente (como Admin):
+#              New-NetFirewallRule -DisplayName "llama-server LAN" -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow
+#           2. Verifique IP local: ipconfig
+#           3. Teste no proprio PC: curl http://127.0.0.1:8080/health
+#
+# PROBLEMA: DeepSeek demora muito para carregar
+# SOLUCAO:  Normal para 6.7B. Aguarde ou reduza Context para 2048 no $MODELS
+#
+# PROBLEMA: Respostas truncadas ou incompletas
+# SOLUCAO:  Aumente MaxTokens no catalogo $MODELS (tente 4096)
+#
+# PROBLEMA: Servidor nao inicia, porta em uso
+# SOLUCAO:  netstat -ano | findstr :8080 para achar o PID, depois taskkill /PID X /F
+#
+# PROBLEMA: Erros de CUDA/DLL nao encontrada
+# SOLUCAO:  Verifique se o diretorio do llama.cpp esta no PATH do sistema
+#
+# PROBLEMA: OOM / Out of Memory na GPU
+# SOLUCAO:  Reduza GpuLayers no modelo (ex: 35 -> 28 -> 20)
+#           Ou reduza Context (ex: 32768 -> 16384 -> 4096)
+#
+# ============================================================================
