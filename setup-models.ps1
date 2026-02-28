@@ -5,6 +5,7 @@
 .DESCRIPTION
     Script interativo para baixar modelos de linguagem (LLM) no formato GGUF:
     - Qwen2.5-Coder-0.5B-Instruct (~379 MB)
+    - Qwen2.5-3B-Instruct (~1.93 GB)
     - deepseek-coder-6.7b-instruct (~4.08 GB)
     
     Funcionalidades:
@@ -48,11 +49,14 @@
       [DRIVE]:\models-ai\
         ├── qwen2.5-coder-0.5b-instruct\
         │   └── qwen2.5-coder-0.5b-instruct-q4_k_m.gguf
+        ├── qwen2.5-3b-instruct\
+        │   └── Qwen2.5-3B-Instruct-Q4_K_M.gguf
         └── deepseek-coder-6.7b-instruct\
             └── deepseek-coder-6.7b-instruct-q4_k_m.gguf
     
     Tamanhos reais dos modelos (Q4_K_M):
       • Qwen2.5-Coder-0.5B: ~379 MB
+      • Qwen2.5-3B-Instruct: ~1.93 GB
       • deepseek-coder-6.7B: ~4.08 GB
     
     Segurança:
@@ -84,6 +88,16 @@ $models = @(
     },
     @{
         Id = "2"
+        Name = "qwen2.5-3b-instruct"
+        DisplayName = "Qwen2.5-3B Instruct"
+        File = "Qwen2.5-3B-Instruct-Q4_K_M.gguf"
+        Url = "https://huggingface.co/bartowski/Qwen2.5-3B-Instruct-GGUF/resolve/main/Qwen2.5-3B-Instruct-Q4_K_M.gguf"
+        ExpectedSizeMB = 1976
+        SizeDesc = "1.93 GB"
+        Description = "Recomendado: Melhor balanço entre velocidade e inteligência (6GB VRAM)"
+    },
+    @{
+        Id = "3"
         Name = "deepseek-coder-6.7b-instruct"
         DisplayName = "deepseek-coder 6.7B"
         File = "deepseek-coder-6.7b-instruct-q4_k_m.gguf"
@@ -152,7 +166,7 @@ function Select-Model {
     }
     
     do {
-        $choice = Read-Host "Digite o numero do modelo (1-2)"
+        $choice = Read-Host "Digite o numero do modelo (1-$($models.Count))"
         
         $selectedModel = $models | Where-Object { $_.Id -eq $choice }
         if ($selectedModel) {
@@ -161,7 +175,7 @@ function Select-Model {
             return $selectedModel
         }
         else {
-            Write-Host "ERROR: Opcao invalida. Digite 1 ou 2." -ForegroundColor Red
+            Write-Host "ERROR: Opcao invalida. Digite 1 a $($models.Count)." -ForegroundColor Red
         }
     } while ($true)
 }
