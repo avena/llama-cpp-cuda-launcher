@@ -1,11 +1,7 @@
 {
   "recommendations": [
     // JavaScript/TypeScript/React
-    "akamud.vscode-javascript-snippet-pack",
-    "burkeholland.simple-react-snippets",
-    "xabikos.javascriptsnippets",
-    "formulahendry.auto-close-tag",
-    "formulahendry.auto-rename-tag",
+    "burkeholland.simple-react-snippets",    
     // end JavaScript/TypeScript/React
 
     // CSS/Sass/Tailwind
@@ -37,6 +33,7 @@
     "supermaven.supermaven",
     "kilocode.kilo-code",
     "Blackboxapp.blackbox",
+    "OpenAI.chatgpt",
     // end IA/Code Completion
 
     // Remote Development
@@ -50,11 +47,9 @@
     // end Remote Development
 
     // Ferramentas Gerais
-    "aaron-bond.better-comments",
     "christian-kohler.path-intellisense",
     "esbenp.prettier-vscode",
     "humao.rest-client",
-    "kevinkyang.auto-comment-blocks",
     "rangav.vscode-thunder-client",
     "redhat.vscode-yaml",
     "ritwickdey.liveserver",

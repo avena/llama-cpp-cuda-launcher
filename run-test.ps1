@@ -9,7 +9,7 @@ param(
 . "$PSScriptRoot\load-env.ps1"
 
 # Configuração
-$testDir = Join-Path -Path $PSScriptRoot -ChildPath "test"
+$testDir = Join-Path -Path $PSScriptRoot -ChildPath "tests"
 
 # Usa LLAMA_SERVER_URL do .env
 $baseUrl = $env:LLAMA_SERVER_URL

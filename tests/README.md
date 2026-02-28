@@ -5,12 +5,12 @@ This folder contains the test framework for validating LLaMA.cpp models.
 ## Structure
 
 ```
-test/
+tests/
 ├── _test-core.ps1              # Core test functions (single source of truth)
 ├── test-deepseek-coder-6.7b.ps1 # Test for DeepSeek Coder 6.7B
 ├── test-qwen2.5-3b.ps1          # Test for Qwen2.5 3B
-├── test-qwen2.5-coder-0.5b.ps1 # Test for Qwen2.5 Coder 0.5B
-├── test-qwen2.5-coder-7b.ps1   # Test for Qwen2.5 Coder 7B
+├── test-qwen2.5-coder-0.5b.ps1  # Test for Qwen2.5 Coder 0.5B
+├── test-qwen2.5-coder-7b.ps1    # Test for Qwen2.5 Coder 7B
 └── README.md                   # This file
 ```
 
@@ -39,7 +39,7 @@ Each test script:
 
 ### Step 1: Create Test Script
 
-Create a new file `test/test-<model-name>.ps1`:
+Create a new file `tests/test-<model-name>.ps1`:
 
 ```powershell
 #!/usr/bin/env pwsh

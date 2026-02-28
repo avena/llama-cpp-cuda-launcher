@@ -6,6 +6,7 @@ Scripts PowerShell para Windows que automatizam instalação do **llama.cpp** co
 
 ## Tabela de Conteúdos
 
+- [Configuração do Ambiente](#configuração-do-ambiente)
 - [Quick Start](#quick-start)
 - [Pré-requisitos](#pré-requisitos)
 - [Instalação](#instalação)
@@ -20,6 +21,45 @@ Scripts PowerShell para Windows que automatizam instalação do **llama.cpp** co
 
 ---
 
+## Configuração do Ambiente
+
+Configure seu ambiente Windows antes de começar. Esta seção instala o PowerShell 7, Scoop e aria2c.
+
+### Passo 1 — PowerShell 7
+
+```powershell
+# Instalar PS7
+winget install Microsoft.PowerShell
+
+# Definir como padrão
+powershell -ExecutionPolicy Bypass -File .\Set-PowerShell7AsDefault.ps1
+```
+
+### Passo 2 — Scoop (opcional mas recomendado)
+
+Scoop é um gerenciador de pacotes para Windows que facilita a instalação e atualização de ferramentas como aria2c.
+
+```powershell
+# Instalar Scoop (execute em PowerShell 7)
+irm get.scoop.sh | iex
+
+# Adicionar bucket principal
+scoop bucket add main
+```
+
+### Passo 3 — aria2c
+
+Escolha uma das opções abaixo para instalar o aria2c (usado para downloads rápidos):
+
+| Método     | Comando                      | Observação                             |
+| ---------- | ---------------------------- | -------------------------------------- |
+| **winget** | `winget install aria2.aria2` | Método oficial Microsoft               |
+| **scoop**  | `scoop install aria2`        | Recomendado se Scoop estiver instalado |
+
+> **Por que usar aria2c?** Downloads paralelos e resumíveis, essencial para baixar modelos GGUF de vários GB rapidamente.
+
+---
+
 ## Quick Start
 
 Para quem já tem o ambiente configurado — os 4 comandos do dia a dia:
@@ -29,7 +69,7 @@ Para quem já tem o ambiente configurado — os 4 comandos do dia a dia:
 .\setup-models.ps1
 
 # 2. Iniciar servidor
-.\start-llama-server_qwen2.5-3b.ps1
+.\start-llama-server.ps1
 
 # 3. Testar (opcional, em outro terminal)
 cp .env.example .env
@@ -46,8 +86,9 @@ cp .env.example .env
 - Windows 10/11 com PowerShell 5.1+ (recomendado PowerShell 7)
 - GPU NVIDIA com suporte a CUDA 12.4 ou 13.1
 - Mínimo **6 GB de VRAM**
-- `aria2c` para downloads rápidos: `winget install aria2.aria2`
 - ~5 GB de espaço em disco
+
+> **Nota:** A configuração do PowerShell 7, Scoop e aria2c está descrita na seção [Configuração do Ambiente](#configuração-do-ambiente).
 
 ---
 
@@ -62,6 +103,7 @@ powershell -ExecutionPolicy Bypass -File .\setup_llama_cpp_cuda12_cuda_13_aria2c
 ```
 
 O script irá:
+
 - Detectar CUDA via `nvidia-smi` (suporta 12.4 e 13.1)
 - Baixar binários pré-compilados + DLLs do CUDA Runtime
 - Extrair para `[DISCO]:\llama-cpp-cuda124` ou `cuda131`
@@ -69,23 +111,17 @@ O script irá:
 <details>
 <summary>Alternativas de instalação (scripts legados)</summary>
 
-| Script | Quando usar |
-|--------|-------------|
+| Script                               | Quando usar                     |
+| ------------------------------------ | ------------------------------- |
 | `setup_llama_cpp_cuda12_cuda_13.ps1` | Sem aria2c, detecção automática |
-| `setup_llama_cpp_cuda124.ps1` | CUDA 12.4 fixo, sem aria2c |
-| `setup_llama_cpp_cuda124_aria2c.ps1` | CUDA 12.4 fixo, com aria2c |
+| `setup_llama_cpp_cuda124.ps1`        | CUDA 12.4 fixo, sem aria2c      |
+| `setup_llama_cpp_cuda124_aria2c.ps1` | CUDA 12.4 fixo, com aria2c      |
 
 </details>
 
-### Passo 2 — PowerShell 7 (recomendado)
+### Passo 2 — PowerShell 7, Scoop e aria2c
 
-```powershell
-# Instalar PS7
-winget install Microsoft.PowerShell
-
-# Definir como padrão
-powershell -ExecutionPolicy Bypass -File .\Set-PowerShell7AsDefault.ps1
-```
+Consulte a seção [Configuração do Ambiente](#configuração-do-ambiente) para instalar PowerShell 7, Scoop e aria2c.
 
 ---
 
@@ -126,12 +162,12 @@ C:\models-ai\
 
 ### Qual modelo escolher
 
-| Modelo | Tamanho | VRAM | Tokens/s (RTX 4050) | Ideal para |
-|--------|---------|------|---------------------|------------|
-| Qwen2.5-Coder-0.5B Q4_K_M | 379 MB | ~0.8 GB | >80 t/s | Testes rápidos, protótipos |
-| ✅ **Qwen2.5-3B-Instruct Q4_K_M** | ~1.9 GB | ~2 GB | **~58 t/s** | **Uso geral — recomendado** |
-| Qwen2.5-Coder-7B Q4_K_M | ~4.7 GB | ~5.3 GB | 15–25 t/s | Código, melhor qualidade |
-| DeepSeek-Coder-6.7B Q4_K_M | ~4.0 GB | ~5.8 GB | ~6 t/s | Produção (hardware mais potente) |
+| Modelo                            | Tamanho | VRAM    | Tokens/s (RTX 4050) | Ideal para                       |
+| --------------------------------- | ------- | ------- | ------------------- | -------------------------------- |
+| Qwen2.5-Coder-0.5B Q4_K_M         | 379 MB  | ~0.8 GB | >80 t/s             | Testes rápidos, protótipos       |
+| ✅ **Qwen2.5-3B-Instruct Q4_K_M** | ~1.9 GB | ~2 GB   | **~58 t/s**         | **Uso geral — recomendado**      |
+| Qwen2.5-Coder-7B Q4_K_M           | ~4.7 GB | ~5.3 GB | 15–25 t/s           | Código, melhor qualidade         |
+| DeepSeek-Coder-6.7B Q4_K_M        | ~4.0 GB | ~5.8 GB | ~6 t/s              | Produção (hardware mais potente) |
 
 > **Por que o Qwen2.5-3B é o sweet spot na RTX 4050?**
 > Com ~2 GB de VRAM, deixa ~4 GB livres para cache KV — roda 100% na GPU com contexto longo sem spill para RAM.
@@ -141,10 +177,10 @@ C:\models-ai\
 
 > Teste: `"Write a Python function that receives a list of integers and returns only the even numbers"`
 
-| Modelo | Tokens | Tempo | Tokens/s |
-|--------|--------|-------|----------|
-| deepseek-coder-6.7b Q4_K_M | 86 | 14s | 6,11 t/s |
-| **Qwen2.5-3B-Instruct Q4_K_M** | 263 | 4,5s | **~58 t/s** ✅ |
+| Modelo                         | Tokens | Tempo | Tokens/s       |
+| ------------------------------ | ------ | ----- | -------------- |
+| deepseek-coder-6.7b Q4_K_M     | 86     | 14s   | 6,11 t/s       |
+| **Qwen2.5-3B-Instruct Q4_K_M** | 263    | 4,5s  | **~58 t/s** ✅ |
 
 > RTX 4050 notebook tem **192 GB/s** de bandwidth de memória. Inferência em LLMs é muito sensível a isso.
 
@@ -156,13 +192,13 @@ C:\models-ai\
 
 **UD — Unsloth Dynamic** — precisão mista por camada (críticas em 8-bit, demais em 2–3 bits). Qualidade próxima do Q8, tamanho menor que Q4. Disponível em menos modelos.
 
-| Quantização | Qualidade | Tamanho | Recomendação |
-|-------------|-----------|---------|--------------|
-| Q5_K_M | ⭐⭐⭐⭐⭐ | Maior | Se sobrar VRAM |
-| Q4_K_M | ⭐⭐⭐⭐ | Médio | ✅ Padrão seguro |
-| IQ4_XS | ⭐⭐⭐⭐+ | Menor | Melhor para modelos ≤7B |
-| UD-Q4 | ⭐⭐⭐⭐⭐ | Menor | Melhor custo/benefício |
-| Q3_K_M | ⭐⭐⭐ | Pequeno | Se VRAM for crítica |
+| Quantização | Qualidade  | Tamanho | Recomendação            |
+| ----------- | ---------- | ------- | ----------------------- |
+| Q5_K_M      | ⭐⭐⭐⭐⭐ | Maior   | Se sobrar VRAM          |
+| Q4_K_M      | ⭐⭐⭐⭐   | Médio   | ✅ Padrão seguro        |
+| IQ4_XS      | ⭐⭐⭐⭐+  | Menor   | Melhor para modelos ≤7B |
+| UD-Q4       | ⭐⭐⭐⭐⭐ | Menor   | Melhor custo/benefício  |
+| Q3_K_M      | ⭐⭐⭐     | Pequeno | Se VRAM for crítica     |
 
 ---
 
@@ -171,18 +207,18 @@ C:\models-ai\
 ### Opção A — Uso Geral ⭐ Recomendado
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\start-llama-server_qwen2.5-3b.ps1
+powershell -ExecutionPolicy Bypass -File .\start-llama-server.ps1
 ```
 
-Menu interativo com 3 modelos, parâmetros configuráveis e suporte a LAN simultâneo.
+Menu interativo com 4 modelos, parâmetros configuráveis e suporte a LAN simultâneo.
 
-| Parâmetro | Qwen2.5-0.5B | Qwen2.5-3B | DeepSeek-6.7B |
-|-----------|-------------|-----------|--------------|
-| Context | 16384 | 32768 | 16384 |
-| VRAM Est. | ~0.8 GB | ~2 GB | ~5.8 GB |
-| GPU Layers | 999 | 999 | 35 |
-| Max Tokens | 512 | 2048 | 2048 |
-| Flash Attention | ✅ | ✅ | ✅ |
+| Parâmetro       | Qwen2.5-0.5B | Qwen2.5-3B | Qwen2.5-7B | DeepSeek-6.7B |
+| --------------- | ------------ | ---------- | ---------- | ------------- |
+| Context         | 16384        | 32768      | 32768      | 16384         |
+| VRAM Est.       | ~0.8 GB      | ~2 GB      | ~5.3 GB    | ~5.8 GB       |
+| GPU Layers      | 999          | 999        | 999        | 35            |
+| Max Tokens      | 512          | 2048       | 2048       | 2048          |
+| Flash Attention | ✅           | ✅         | ✅         | ✅            |
 
 Output ao iniciar:
 
@@ -209,9 +245,9 @@ Específico para Ada Lovelace (RTX 40xx) com 6 GB. Ativa:
 > Context do DeepSeek reduzido para 8192 para caber nos 6 GB.
 
 <details>
-<summary>Opção C — Script legado (start-llama-server.ps1)</summary>
+<summary>Opção C — Script com todos os 4 modelos</summary>
 
-Versão básica com Qwen2.5-0.5B e DeepSeek-6.7B. Compatível com todas as GPUs, sem Flash Attention.
+Script completo com todos os modelos disponíveis (Qwen2.5-0.5B, Qwen2.5-3B, Qwen2.5-Coder-7B, DeepSeek-6.7B). Recomendado para quem quer acesso a todos os modelos.
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\start-llama-server.ps1
@@ -228,12 +264,12 @@ powershell -ExecutionPolicy Bypass -File .\start-llama-server.ps1
 1. Abra as configurações do Cline → **Connect to a model** → **OpenAI Compatible**
 2. Preencha os campos:
 
-| Campo | Valor |
-|-------|-------|
-| Base URL | `http://127.0.0.1:8080/v1` |
-| API Key | `sk-no-key-required` |
-| Model | `qwen2.5-3b-instruct-q4_k_m.gguf` |
-| Max Tokens | `2048` |
+| Campo      | Valor                             |
+| ---------- | --------------------------------- |
+| Base URL   | `http://127.0.0.1:8080/v1`        |
+| API Key    | `sk-no-key-required`              |
+| Model      | `qwen2.5-3b-instruct-q4_k_m.gguf` |
+| Max Tokens | `2048`                            |
 
 ### Continue.dev
 
@@ -295,20 +331,21 @@ cp .env.example .env
 
 **Métricas geradas:**
 
-| Métrica | Descrição |
-|---------|-----------|
-| Prompt Speed | Velocidade de leitura do prompt (tokens/s) |
-| Predict Speed | Velocidade de geração (tokens/s) |
-| Total Inference | Tempo total (ms) |
-| Stop Reason | `eos` = terminou natural ✔ / `limit` = truncado |
+| Métrica         | Descrição                                       |
+| --------------- | ----------------------------------------------- |
+| Prompt Speed    | Velocidade de leitura do prompt (tokens/s)      |
+| Predict Speed   | Velocidade de geração (tokens/s)                |
+| Total Inference | Tempo total (ms)                                |
+| Stop Reason     | `eos` = terminou natural ✔ / `limit` = truncado |
 
 **Scripts de teste disponíveis:**
 
-| Script | Modelo |
-|--------|--------|
-| `test/test-qwen2.5-3b.ps1` | Qwen2.5-3B-Instruct |
-| `test/test-qwen2.5-coder-0.5b.ps1` | Qwen2.5-Coder-0.5B |
-| `test/test-deepseek-coder-6.7b.ps1` | DeepSeek-Coder-6.7B |
+| Script                               | Modelo                    |
+| ------------------------------------ | ------------------------- |
+| `tests/test-qwen2.5-3b.ps1`          | Qwen2.5-3B-Instruct       |
+| `tests/test-qwen2.5-coder-0.5b.ps1`  | Qwen2.5-Coder-0.5B        |
+| `tests/test-qwen2.5-coder-7b.ps1`    | Qwen2.5-Coder-7B-Instruct |
+| `tests/test-deepseek-coder-6.7b.ps1` | DeepSeek-Coder-6.7B       |
 
 ### Variáveis de Ambiente (.env)
 
@@ -316,11 +353,11 @@ cp .env.example .env
 cp .env.example .env
 ```
 
-| Variável | Padrão | Descrição |
-|----------|--------|-----------|
-| `LLAMA_SERVER_URL` | `http://localhost:8080` | URL do servidor |
-| `DEFAULT_MAX_TOKENS` | `2048` | Tokens máximos na geração |
-| `DEFAULT_TEMPERATURE` | `0.2` | Temperatura padrão |
+| Variável              | Padrão                  | Descrição                 |
+| --------------------- | ----------------------- | ------------------------- |
+| `LLAMA_SERVER_URL`    | `http://localhost:8080` | URL do servidor           |
+| `DEFAULT_MAX_TOKENS`  | `2048`                  | Tokens máximos na geração |
+| `DEFAULT_TEMPERATURE` | `0.2`                   | Temperatura padrão        |
 
 ---
 
@@ -384,9 +421,10 @@ cp .env.example .env
 ### 🛠️ Tarefas de Scripts
 
 - [ ] `setup-models.ps1` com opção para R1-distilled (1.5B e 7B)
-- [ ] `test/test-deepseek-r1-distill-1.5b.ps1` com prompts de raciocínio
-- [ ] `test/test-deepseek-r1-distill-7b.ps1`
-- [ ] `test/test-qwen2.5-coder-3b.ps1` e `test/test-qwen2.5-coder-7b.ps1`
+- [ ] `tests/test-deepseek-r1-distill-1.5b.ps1` com prompts de raciocínio
+- [ ] `tests/test-deepseek-r1-distill-7b.ps1`
+- [x] `tests/test-qwen2.5-coder-7b.ps1` ✅
+- [ ] `tests/test-qwen2.5-coder-3b.ps1`
 - [ ] `start-llama-server_qwen2.5-3b.ps1` — opção `[4]` qwen2.5-coder-7b e `[5]` deepseek-r1-distill-1.5b
 - [ ] `run-benchmark-all.ps1` — testa todos os modelos instalados e gera tabela comparativa de t/s
 
@@ -394,14 +432,14 @@ cp .env.example .env
 
 ## Solução de Problemas
 
-| Problema | Solução |
-|----------|---------|
-| `aria2c não encontrado` | `winget install aria2.aria2` e reiniciar terminal |
-| GPU não reconhecida | Verificar `nvidia-smi` e `nvcc --version` |
-| Porta 8080 ocupada | `netstat -an \| findstr 8080` |
-| DeepSeek muito lento | RTX 4050 tem bandwidth limitado; trocar para Qwen2.5-3B |
-| Resposta truncada | Stop reason `limit` — aumentar `DEFAULT_MAX_TOKENS` no `.env` |
-| Cline não conecta | `Invoke-WebRequest http://127.0.0.1:8080/health` deve retornar `{"status":"ok"}` |
+| Problema                | Solução                                                                          |
+| ----------------------- | -------------------------------------------------------------------------------- |
+| `aria2c não encontrado` | `winget install aria2.aria2` e reiniciar terminal                                |
+| GPU não reconhecida     | Verificar `nvidia-smi` e `nvcc --version`                                        |
+| Porta 8080 ocupada      | `netstat -an \| findstr 8080`                                                    |
+| DeepSeek muito lento    | RTX 4050 tem bandwidth limitado; trocar para Qwen2.5-3B                          |
+| Resposta truncada       | Stop reason `limit` — aumentar `DEFAULT_MAX_TOKENS` no `.env`                    |
+| Cline não conecta       | `Invoke-WebRequest http://127.0.0.1:8080/health` deve retornar `{"status":"ok"}` |
 
 ```powershell
 # Logs em tempo real
@@ -412,7 +450,6 @@ nvidia-smi --query-gpu=utilization.gpu,memory.used,memory.free --format=csv -l 2
 ```
 
 ---
-
 
 ## Referências
 
