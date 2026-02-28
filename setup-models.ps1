@@ -7,6 +7,7 @@
     - Qwen2.5-Coder-0.5B-Instruct (~379 MB)
     - Qwen2.5-3B-Instruct (~1.93 GB)
     - deepseek-coder-6.7b-instruct (~4.08 GB)
+    - Qwen2.5-Coder-7B-Instruct (~4.68 GB)
     
     Funcionalidades:
     • Menu de seleção de modelo
@@ -51,13 +52,16 @@
         │   └── qwen2.5-coder-0.5b-instruct-q4_k_m.gguf
         ├── qwen2.5-3b-instruct\
         │   └── Qwen2.5-3B-Instruct-Q4_K_M.gguf
-        └── deepseek-coder-6.7b-instruct\
-            └── deepseek-coder-6.7b-instruct-q4_k_m.gguf
+        ├── deepseek-coder-6.7b-instruct\
+        │   └── deepseek-coder-6.7b-instruct-q4_k_m.gguf
+        └── qwen2.5-coder-7b-instruct\
+            └── qwen2.5-coder-7b-instruct-q4_k_m.gguf
     
     Tamanhos reais dos modelos (Q4_K_M):
       • Qwen2.5-Coder-0.5B: ~379 MB
       • Qwen2.5-3B-Instruct: ~1.93 GB
       • deepseek-coder-6.7B: ~4.08 GB
+      • Qwen2.5-Coder-7B: ~4.68 GB
     
     Segurança:
       - Revise sempre o código antes de executar scripts da internet
@@ -105,6 +109,16 @@ $models = @(
         ExpectedSizeMB = 4175  # Tamanho REAL do arquivo Q4_K_M
         SizeDesc = "4.08 GB"
         Description = "Modelo grande (6.7B), alta qualidade para produção"
+    },
+    @{
+        Id = "4"
+        Name = "qwen2.5-coder-7b-instruct"
+        DisplayName = "Qwen2.5-Coder 7B"
+        File = "qwen2.5-coder-7b-instruct-q4_k_m.gguf"
+        Url = "https://huggingface.co/Triangle104/Qwen2.5-Coder-7B-Instruct-Q4_K_M-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf"
+        ExpectedSizeMB = 4800  # Tamanho REAL do arquivo Q4_K_M (aproximadamente 4.68 GB)
+        SizeDesc = "4.68 GB"
+        Description = "Modelo grande (7B), alta qualidade para desenvolvimento avançado"
     }
 )
 
