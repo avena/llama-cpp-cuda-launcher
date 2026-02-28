@@ -23,8 +23,131 @@ $MODELS = @(
         Template      = 'deepseek-coder-chat-template.jinja'
         DefaultTemp   = 0.1
         DefaultRepeat = 1.1
+    },
+    @{
+        Name          = 'Qwen2.5 3B Instruct (equilibrio velocidade/qualidade)'
+        Path          = 'C:\models-ai\qwen2.5-3b-instruct\Qwen2.5-3B-Instruct-Q4_K_M.gguf'
+        ID            = 'qwen2.5-3b-instruct-q4_k_m.gguf'
+        Context       = 32768
+        Template      = 'chatml'
+        DefaultTemp   = 0.35
+        DefaultRepeat = 1.2
+    },
+    @{
+        Name          = 'Qwen2.5 Coder 7B (capaz, equilibrado)'
+        Path          = 'C:\models-ai\qwen2.5-coder-7b-instruct\qwen2.5-coder-7b-instruct-q4_k_m.gguf'
+        ID            = 'qwen2.5-coder-7b-instruct-q4_k_m.gguf'
+        Context       = 32768
+        Template      = 'qwen'
+        DefaultTemp   = 0.3
+        DefaultRepeat = 1.2
     }
 )
+
+# ============================================================================
+# TABELA DE REFERENCIA: MODELOS DISPONIVEIS
+# ============================================================================
+#
+# Modelo                              Params  VRAM(Q4)  Contexto  Velocidade  Uso Recomendado
+# qwen2.5-coder-0.5b Q4_K_M          0.5B    ~1 GB     16384     Muito rap.  Tarefas rapidas, baixo consumo
+# qwen2.5-3b-instruct Q4_K_M         3B      ~2 GB     32768     Rapida      Equilibrio qualidade/velocidade
+# deepseek-coder-6.7b Q4_K_M         6.7B    ~4.2 GB   16384     Moderada    Tarefas complexas, alta capacidade
+# qwen2.5-coder-7b-instruct Q4_K_M   7B      ~4.7 GB   32768     Moderada    Maxima capacidade, codificacao avancada
+#
+# ============================================================================
+# TABELA DE REFERENCIA: PARAMETROS DE GERACAO
+# ============================================================================
+#
+# TEMPERATURA
+# -----------
+# Valor     Comportamento                       Quando Usar
+# 0.0-0.3   Respostas deterministicas, focadas  Codigo, fatos, instrucoes precisas
+# 0.4-0.6   Equilibrio foco/criatividade        Uso geral, assistente de programacao
+# 0.7-1.0   Mais criativo, pode divagar         Brainstorming, texto criativo
+# > 1.0     Muito aleatorio, imprevisivel       Experimental, nao recomendado
+#
+# REPEAT PENALTY
+# --------------
+# Valor     Comportamento                       Quando Usar
+# 1.0       Sem penalidade, pode repetir muito  Nao recomendado
+# 1.1-1.3   Penalidade leve, evita loops        Uso geral, recomendado padrao
+# 1.4-1.6   Penalidade moderada, mais variado   Quando houver repeticao excessiva
+# > 1.7     Penalidade forte, pode prejudicar   Casos especificos graves
+#
+# COMBINACOES RECOMENDADAS POR MODELO
+# -----------------------------------
+# Qwen2.5 Coder 0.5B:    Temperature 0.3-0.5  |  Repeat Penalty 1.2-1.3
+# Qwen2.5 3B Instruct:   Temperature 0.3-0.4  |  Repeat Penalty 1.1-1.2
+# DeepSeek Coder 6.7B:   Temperature 0.1-0.3  |  Repeat Penalty 1.1-1.2
+# Qwen2.5 Coder 7B:      Temperature 0.2-0.4  |  Repeat Penalty 1.1-1.3
+#
+# ============================================================================
+# DICAS DE USO
+# ============================================================================
+#
+# 1. TROCAR DE MODELO SEM REINICIAR O CLINE:
+#    - Pare o servidor:  Get-Process llama-server | Stop-Process
+#    - Execute o script novamente e escolha outro modelo
+#    - No Cline, atualize o campo Model com o novo ID
+#
+# 2. VERIFICAR QUAL MODELO ESTA ATIVO:
+#    - Acesse: http://127.0.0.1:8080/v1/models
+#    - O campo id mostra o nome exato do modelo carregado
+#
+# 3. SE O DEEPSEEK OU QWEN 7B NAO CARREGAR (OOM de VRAM):
+#    - Reduza Context para 8192 ou 4096 no catalogo $MODELS
+#    - Ou use o Qwen 3B ou 0.5B como alternativa
+#
+# 4. ADICIONAR NOVOS MODELOS AO MENU:
+#    - Adicione um bloco @{ } ao array $MODELS no topo do script
+#    - Campos obrigatorios: Name, Path, ID, Context, Template,
+#                           DefaultTemp, DefaultRepeat
+#    - Templates validos: qwen, chatml, deepseek, llama3, phi3, gemma
+#
+# ============================================================================
+# COMANDOS UTEIS PARA MANUTENCAO
+# ============================================================================
+#
+# Verificar modelo ativo e status:
+#   curl http://127.0.0.1:8080/health
+#   curl http://127.0.0.1:8080/v1/models
+#
+# Ver logs em tempo real:
+#   Get-Content $env:TEMP\llama-server.log -Tail 20 -Wait
+#
+# Parar o servidor:
+#   Get-Process llama-server -ErrorAction SilentlyContinue | Stop-Process
+#
+# Verificar processos na porta 8080:
+#   netstat -ano | findstr :8080
+#
+# Liberar porta ocupada:
+#   taskkill /PID <PID> /F
+#
+# ============================================================================
+# SOLUCAO DE PROBLEMAS
+# ============================================================================
+#
+# PROBLEMA: Model not found no Cline
+# SOLUCAO:  Use exatamente o ID retornado por /v1/models, incluindo .gguf
+#
+# PROBLEMA: DeepSeek ou Qwen 7B demora muito para carregar
+# SOLUCAO:  Normal para modelos maiores. Aguarde ou reduza Context no $MODELS
+#
+# PROBLEMA: Respostas truncadas ou incompletas
+# SOLUCAO:  Aumente MaxTokens no catalogo $MODELS (tente 4096)
+#
+# PROBLEMA: Servidor nao inicia, porta em uso
+# SOLUCAO:  netstat -ano | findstr :8080 para achar o PID, depois taskkill /PID X /F
+#
+# PROBLEMA: Erros de CUDA/DLL nao encontrada
+# SOLUCAO:  Verifique se o diretorio do llama.cpp esta no PATH do sistema
+#
+# PROBLEMA: OOM / Out of Memory na GPU
+# SOLUCAO:  Reduza Context no modelo (ex: 32768 -> 16384 -> 8192)
+#           Ou use modelos menores (0.5B ou 3B)
+#
+# ============================================================================
 
 # ============================================================================
 # CONFIGURACOES GERAIS
