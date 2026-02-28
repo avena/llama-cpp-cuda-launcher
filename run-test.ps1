@@ -10,7 +10,6 @@ param(
 
 # Configuração
 $testDir = Join-Path -Path $PSScriptRoot -ChildPath "test"
-$coreTestScript = Join-Path -Path $testDir -ChildPath "_test-core.ps1"
 
 # Usa LLAMA_SERVER_URL do .env
 $baseUrl = $env:LLAMA_SERVER_URL
@@ -30,11 +29,13 @@ try {
     $healthResponse = Invoke-WebRequest -Uri "$baseUrl/health" -UseBasicParsing -TimeoutSec 10
     if ($healthResponse.StatusCode -eq 200) {
         Write-Host "✅ Servidor respondendo em $baseUrl" -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "❌ Servidor retornou status $($healthResponse.StatusCode)" -ForegroundColor Red
         exit 1
     }
-} catch {
+}
+catch {
     Write-Host "❌ Servidor não está respondendo: $($_.Exception.Message)" -ForegroundColor Red
     exit 1
 }
@@ -48,11 +49,13 @@ try {
     if ($propsResponse.model_alias) {
         $activeModel = $propsResponse.model_alias
         Write-Host "Modelo encontrado (model_alias): $activeModel" -ForegroundColor Green
-    } elseif ($propsResponse.model_path) {
+    }
+    elseif ($propsResponse.model_path) {
         $activeModel = Split-Path -Path $propsResponse.model_path -Leaf
         Write-Host "Modelo encontrado (model_path): $activeModel" -ForegroundColor Green
     }
-} catch {
+}
+catch {
     Write-Host "❌ Erro ao obter modelo: $($_.Exception.Message)" -ForegroundColor Red
     exit 1
 }
@@ -111,11 +114,13 @@ try {
     if ($?) {
         Write-Host "✅ Teste concluído com sucesso!" -ForegroundColor Green
         exit 0
-    } else {
+    }
+    else {
         Write-Host "❌ Teste falhou." -ForegroundColor Red
         exit 1
     }
-} catch {
+}
+catch {
     Write-Host "❌ Erro ao executar teste: $($_.Exception.Message)" -ForegroundColor Red
     exit 1
 }
