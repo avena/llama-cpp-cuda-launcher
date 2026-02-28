@@ -1,0 +1,74 @@
+{
+  "recommendations": [
+    // JavaScript/TypeScript/React
+    "akamud.vscode-javascript-snippet-pack",
+    "burkeholland.simple-react-snippets",
+    "xabikos.javascriptsnippets",
+    "formulahendry.auto-close-tag",
+    "formulahendry.auto-rename-tag",
+    // end JavaScript/TypeScript/React
+
+    // CSS/Sass/Tailwind
+    "bradlc.vscode-tailwindcss",
+    "glenn2223.live-sass",
+    "syler.sass-indented",
+    // end CSS/Sass/Tailwind
+
+    // Docker/Kubernetes/Cloud
+    "ms-azuretools.vscode-containers",
+    "ms-azuretools.vscode-docker",
+    "ms-kubernetes-tools.vscode-kubernetes-tools",
+    "googlecloudtools.cloudcode",
+    // end Docker/Kubernetes/Cloud
+
+    // Git/GitHub
+    "donjayamanne.githistory",
+    "eamodio.gitlens",
+    "github.codespaces",
+    "gitpod.gitpod-desktop",
+    // end Git/GitHub
+
+    // IA/Code Completion
+    "github.copilot-chat",
+    "HuggingFace.huggingface-vscode-chat",
+    "google.geminicodeassist",
+    "ms-windows-ai-studio.windows-ai-studio",
+    "saoudrizwan.claude-dev",
+    "supermaven.supermaven",
+    "kilocode.kilo-code",
+    "Blackboxapp.blackbox",
+    // end IA/Code Completion
+
+    // Remote Development
+    "ms-vscode-remote.remote-containers",
+    "ms-vscode-remote.remote-ssh",
+    "ms-vscode-remote.remote-ssh-edit",
+    "ms-vscode-remote.remote-wsl",
+    "ms-vscode.remote-explorer",
+    "ms-vscode.remote-server",
+    "ms-vsliveshare.vsliveshare",
+    // end Remote Development
+
+    // Ferramentas Gerais
+    "aaron-bond.better-comments",
+    "christian-kohler.path-intellisense",
+    "esbenp.prettier-vscode",
+    "humao.rest-client",
+    "kevinkyang.auto-comment-blocks",
+    "rangav.vscode-thunder-client",
+    "redhat.vscode-yaml",
+    "ritwickdey.liveserver",
+    "sonarsource.sonarlint-vscode",
+    "streetsidesoftware.code-spell-checker",
+    "streetsidesoftware.code-spell-checker-portuguese-brazilian",
+    "vscode-icons-team.vscode-icons",
+    "ms-ceintl.vscode-language-pack-pt-br",
+    "saposs.app-studio-remote-access",
+    "softwaredotcom.swdc-vscode",
+    // end Ferramentas Gerais
+
+    // Just (justfile)
+    "skellock.just"
+    // end Just
+  ]
+}

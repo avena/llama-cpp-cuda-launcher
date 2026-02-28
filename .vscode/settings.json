@@ -1,0 +1,155 @@
+{
+  "workbench.iconTheme": "vscode-icons",
+  "window.zoomLevel": 2,
+  "editor.fontFamily": "Fira Code",
+  "editor.fontSize": 17,
+  "editor.tabSize": 2,
+  "editor.wordWrap": "on",
+  "editor.formatOnSave": true,
+  "editor.renderWhitespace": "all",
+  "editor.fontLigatures": true,
+  "editor.inlineSuggest.enabled": true,
+  "[just]": {
+    "editor.tabSize": 2,
+    "editor.formatOnSave": false,
+    "editor.formatOnPaste": false
+  },
+  "[python]": {
+    "editor.formatOnType": true
+  },
+  "python.defaultInterpreterPath": "[MISSING: PYTHON_DEFAULT_INTERPRETER]",
+  "cSpell.enabled": true,
+  "cSpell.language": "pt-BR,en",
+  "cSpell.allowCompoundWords": true,
+  "cSpell.words": [
+    "Algumas"
+  ],
+  "openrouter": {
+    "enabled": true,
+    "baseUrl": "https://openrouter.ai/api/v1",
+    "apiKey": "REDACTED_API_KEY",
+    "defaultModel": "openai/gpt-4-turbo",
+    "models": [
+      {
+        "id": "openai/gpt-4-turbo",
+        "name": "GPT-4 Turbo",
+        "provider": "OpenAI",
+        "maxTokens": 128000,
+        "costPer1M": {
+          "input": 10,
+          "output": 30
+        }
+      },
+      {
+        "id": "anthropic/claude-3-opus",
+        "name": "Claude 3 Opus",
+        "provider": "Anthropic",
+        "maxTokens": 200000,
+        "costPer1M": {
+          "input": 15,
+          "output": 75
+        }
+      },
+      {
+        "id": "google/gemini-pro",
+        "name": "Gemini Pro",
+        "provider": "Google",
+        "maxTokens": 32768,
+        "costPer1M": {
+          "input": 0.5,
+          "output": 1.5
+        }
+      },
+      {
+        "id": "zai/glm-4.5-air",
+        "name": "Z.ai GLM 4.5 Air",
+        "provider": "Z.ai",
+        "maxTokens": 131072,
+        "costPer1M": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      {
+        "id": "arcee-ai/trinity-large-preview:free",
+        "name": "Arcee AI: Trinity Large Preview (Free)",
+        "provider": "Arcee AI",
+        "maxTokens": 128000,
+        "costPer1M": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      {
+        "id": "stepfun/step-3.5-flash:free",
+        "name": "StepFun: Step 3.5 Flash (Free)",
+        "provider": "StepFun",
+        "maxTokens": 256000,
+        "costPer1M": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      {
+        "id": "z-ai/glm-4.5-air:free",
+        "name": "Z.ai: GLM 4.5 Air (Free)",
+        "provider": "Z.ai",
+        "maxTokens": 131072,
+        "costPer1M": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      {
+        "id": "deepseek/deepseek-r1-0528:free",
+        "name": "DeepSeek: R1 0528 (Free)",
+        "provider": "DeepSeek",
+        "maxTokens": 164000,
+        "costPer1M": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      {
+        "id": "nvidia/nemotron-3-nano-30b-a3b:free",
+        "name": "NVIDIA: Nemotron 3 Nano 30B (Free)",
+        "provider": "NVIDIA",
+        "maxTokens": 256000,
+        "costPer1M": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      {
+        "id": "openai/gpt-oss-120b:free",
+        "name": "OpenAI: gpt-oss-120b (Free)",
+        "provider": "OpenAI",
+        "maxTokens": 131072,
+        "costPer1M": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      {
+        "id": "upstage/solar-pro-3:free",
+        "name": "Upstage: Solar Pro 3 (Free)",
+        "provider": "Upstage",
+        "maxTokens": 128000,
+        "costPer1M": {
+          "input": 0,
+          "output": 0
+        }
+      },
+      {
+        "id": "arcee-ai/trinity-mini:free",
+        "name": "Arcee AI: Trinity Mini (Free)",
+        "provider": "Arcee AI",
+        "maxTokens": 131072,
+        "costPer1M": {
+          "input": 0,
+          "output": 0
+        }
+      }
+    ]
+  }
+}
