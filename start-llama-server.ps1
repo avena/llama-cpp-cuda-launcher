@@ -11,7 +11,7 @@ $MODELS = @(
         Path          = 'C:\models-ai\qwen2.5-coder-0.5b-instruct\qwen2.5-coder-0.5b-instruct-q4_k_m.gguf'
         ID            = 'qwen2.5-coder-0.5b-instruct-q4_k_m.gguf'
         Context       = 16384
-        Template      = 'qwen'
+        Template      = 'chatml'
         DefaultTemp   = 0.4
         DefaultRepeat = 1.3
     },
@@ -38,7 +38,7 @@ $MODELS = @(
         Path          = 'C:\models-ai\qwen2.5-coder-7b-instruct\qwen2.5-coder-7b-instruct-q4_k_m.gguf'
         ID            = 'qwen2.5-coder-7b-instruct-q4_k_m.gguf'
         Context       = 32768
-        Template      = 'qwen'
+        Template      = 'chatml'
         DefaultTemp   = 0.3
         DefaultRepeat = 1.2
     }
@@ -153,7 +153,7 @@ $MODELS = @(
 # CONFIGURACOES GERAIS
 # ============================================================================
 
-$PORT     = 8080
+$PORT = 8080
 $API_HOST = '0.0.0.0'   # escuta em todas as interfaces (local + rede)
 $LOG_FILE = "$env:TEMP\llama-server.log"
 
@@ -169,10 +169,10 @@ function Show-ModelMenu {
     Write-Host ''
 
     for ($i = 0; $i -lt $script:MODELS.Count; $i++) {
-        $m      = $script:MODELS[$i]
+        $m = $script:MODELS[$i]
         $exists = Test-Path $m.Path
         $status = if ($exists) { '[OK]' } else { '[NAO ENCONTRADO]' }
-        $color  = if ($exists) { 'White' } else { 'Red' }
+        $color = if ($exists) { 'White' } else { 'Red' }
         Write-Host "  [$($i + 1)] $($m.Name)" -ForegroundColor $color
         Write-Host "       $status  $($m.Path)" -ForegroundColor Gray
         Write-Host ''
@@ -181,17 +181,19 @@ function Show-ModelMenu {
     $selected = $null
     do {
         $choice = Read-Host "Digite o numero do modelo (1-$($script:MODELS.Count))"
-        $idx    = 0
+        $idx = 0
         $parsed = [int]::TryParse($choice, [ref]$idx)
 
         if ($parsed -and $idx -ge 1 -and $idx -le $script:MODELS.Count) {
             $candidate = $script:MODELS[$idx - 1]
             if (Test-Path $candidate.Path) {
                 $selected = $candidate
-            } else {
+            }
+            else {
                 Write-Host 'ERROR: Arquivo do modelo nao encontrado. Escolha outro.' -ForegroundColor Red
             }
-        } else {
+        }
+        else {
             Write-Host "ERROR: Digite um numero entre 1 e $($script:MODELS.Count)." -ForegroundColor Red
         }
     } while ($null -eq $selected)
@@ -224,9 +226,9 @@ function Get-ValidNumber {
             return $DefaultValue
         }
 
-        $norm  = $raw.Replace(',', '.')
+        $norm = $raw.Replace(',', '.')
         $value = 0.0
-        $ok    = [double]::TryParse(
+        $ok = [double]::TryParse(
             $norm,
             [System.Globalization.NumberStyles]::Any,
             [System.Globalization.CultureInfo]::InvariantCulture,
@@ -238,10 +240,12 @@ function Get-ValidNumber {
                 $r = [math]::Round($value, $DecimalPlaces)
                 Write-Host "Valor aceito: $r" -ForegroundColor Green
                 return $r
-            } else {
+            }
+            else {
                 Write-Host "ERROR: Valor fora do range. Digite entre $MinValue e $MaxValue." -ForegroundColor Red
             }
-        } else {
+        }
+        else {
             Write-Host 'ERROR: Digite um numero valido.' -ForegroundColor Red
         }
     } while ($true)
@@ -328,7 +332,8 @@ if ($MODEL.Template -ne 'auto') {
         }
         $processArgs += '--chat-template-file'
         $processArgs += $templatePath
-    } else {
+    }
+    else {
         $processArgs += '--chat-template'
         $processArgs += $MODEL.Template
     }
@@ -348,7 +353,7 @@ Write-Host ''
 # HEALTH CHECK — usa 127.0.0.1 localmente mesmo com host 0.0.0.0
 # ============================================================================
 
-$ready   = $false
+$ready = $false
 $timeout = 60
 
 for ($i = 1; $i -le $timeout; $i++) {
@@ -359,7 +364,8 @@ for ($i = 1; $i -le $timeout; $i++) {
             $ready = $true
             break
         }
-    } catch {
+    }
+    catch {
         Write-Host "  Aguardando... ($i/$timeout)" -ForegroundColor Gray
         Start-Sleep -Seconds 1
     }
@@ -398,7 +404,8 @@ if ($ready) {
     Write-Host "  Ver logs:         Get-Content $LOG_FILE -Tail 50 -Wait"
     Write-Host "  Testar local:     curl http://127.0.0.1:$PORT/health"
     Write-Host "  Testar rede:      curl http://192.168.50.1:$PORT/health"
-} else {
+}
+else {
     Write-Host ''
     Write-Host 'AVISO: Servidor nao respondeu no tempo esperado.' -ForegroundColor Yellow
     Write-Host "Verifique o log: Get-Content $LOG_FILE"

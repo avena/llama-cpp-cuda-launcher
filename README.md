@@ -298,15 +298,89 @@ ipconfig | findstr "IPv4"
 
 ## Conceitos
 
+### Chat Templates — Por Que importam
+
+⚠️ **Problema crítico identificado**: Modelos diferentes usam formatos de prompt diferentes. Usar o template errado resulta em respostas ruins ou recusas.
+
+#### Formatos Suportados
+
+| Modelo              | Template          | Formato de Exemplo                     |
+| ------------------- | ----------------- | -------------------------------------- | --------------- | ------------- | ------ | --- |
+| **Qwen2.5**         | `chatml`          | `<                                     | im_start        | >system\n...< | im_end | >`  |
+| **DeepSeek Coder**  | `jinja`           | `<｜begin\u0020of\u0020sequence｜>...` |
+| **Llama 2/Mistral** | `llama2` / `inst` | `[INST]...[/INST]`                     |
+| **Llama 3**         | `llama3`          | `<                                     | start_header_id | >system...<   | eot_id | >`  |
+
+#### O Problema do Qwen2.5 com Formato Errado
+
+O **Qwen2.5-Coder-7B-Instruct** usa ChatML. Se você enviar no formato Llama2:
+
+```
+[INST] You are a precise coding assistant. [/INST]
+```
+
+O modelo **não reconhece** como instrução válida e retorna:
+
+```json
+{ "response": "I'm sorry, but I can't assist with that request." }
+```
+
+**Formato correto (ChatML):**
+
+```
+<|im_start|>system
+You are a precise coding assistant.
+<|im_end|>
+<|im_start|>user
+Write a Python function to filter even numbers
+<|im_end|>
+<|im_start|>assistant
+```
+
+#### Como Configurar no llama.cpp
+
+```bash
+# Usando built-in chatml
+llama-server -m modelo.gguf --chat-template chatml --port 8080
+
+# Usando Jinja oficial (máxima compatibilidade)
+llama-server -m modelo.gguf --jinja --chat-template-file Qwen2.5-7B-Instruct.jinja
+```
+
+O script `start-llama-server.ps1` já configura automaticamente o template correto para cada modelo no catálogo `$MODELS`.
+
+#### Como Configurar nos Testes
+
+Os scripts em `tests/` agora executam **todos os 5 testes automaticamente** usando `Invoke-AllTests`:
+
+```powershell
+# Executa todos os 5 testes de uma vez
+Invoke-AllTests -Model $modelLabel -MaxTokens 2048 -Temperature 0.2 ...
+```
+
+**Perguntas executadas:**
+
+| #   | Teste               | Prompt                                                                                |
+| --- | ------------------- | ------------------------------------------------------------------------------------- |
+| 1   | Fibonacci           | Write a Python function that returns the Fibonacci sequence up to n terms             |
+| 2   | Reverse String      | Write a Python function that reverses a string                                        |
+| 3   | Filter Even Numbers | Write a Python function to filter even numbers                                        |
+| 4   | Binary Search Tree  | Create a Python class for a binary search tree with insert, search and delete methods |
+| 5   | Quicksort           | Implement quicksort in Python and explain the time complexity                         |
+
+O resultado é salvo em um arquivo de log com o template "TEST REPORT — llama.cpp API".
+
 ### Context Window vs Max Tokens
 
 ```
+
 Context do servidor (ex: 16384 tokens)
-├── Histórico da conversa:   ~8288 tokens
-├── Sua mensagem atual:      ~2000 tokens
-└── Max Tokens (resposta):   4096 tokens  ← configure no Cline
-                             ──────────────
-                             TOTAL: 14384 ✔
+├── Histórico da conversa: ~8288 tokens
+├── Sua mensagem atual: ~2000 tokens
+└── Max Tokens (resposta): 4096 tokens ← configure no Cline
+──────────────
+TOTAL: 14384 ✔
+
 ```
 
 - **Context alto** → mais memória de conversa, mais VRAM, mais lento
