@@ -14,6 +14,7 @@ $MODELS = @(
         Template      = 'chatml'
         DefaultTemp   = 0.4
         DefaultRepeat = 1.3
+        GpuLayers     = 0       # CPU only — modelo leve, nao precisa de GPU
     },
     @{
         Name          = 'DeepSeek Coder 6.7B (mais capaz, mais lento)'
@@ -23,6 +24,7 @@ $MODELS = @(
         Template      = 'deepseek-coder-chat-template.jinja'
         DefaultTemp   = 0.1
         DefaultRepeat = 1.1
+        GpuLayers     = 28      # opcional: ~4.2 GB VRAM se quiser offload
     },
     @{
         Name          = 'Qwen2.5 3B Instruct (equilibrio velocidade/qualidade)'
@@ -32,6 +34,7 @@ $MODELS = @(
         Template      = 'chatml'
         DefaultTemp   = 0.35
         DefaultRepeat = 1.2
+        GpuLayers     = 0       # CPU only — ~2 GB VRAM se quiser offload (use 36)
     },
     @{
         Name          = 'Qwen2.5 Coder 7B (capaz, equilibrado)'
@@ -41,6 +44,8 @@ $MODELS = @(
         Template      = 'chatml'
         DefaultTemp   = 0.3
         DefaultRepeat = 1.2
+        GpuLayers     = 33        # faz offload total para GPU (~4.7 GB VRAM)
+
     }
 )
 
@@ -173,8 +178,9 @@ function Show-ModelMenu {
         $exists = Test-Path $m.Path
         $status = if ($exists) { '[OK]' } else { '[NAO ENCONTRADO]' }
         $color = if ($exists) { 'White' } else { 'Red' }
+        $gpu = if ($m.GpuLayers -and $m.GpuLayers -gt 0) { " | GPU: $($m.GpuLayers) layers" } else { " | CPU only" }
         Write-Host "  [$($i + 1)] $($m.Name)" -ForegroundColor $color
-        Write-Host "       $status  $($m.Path)" -ForegroundColor Gray
+        Write-Host "       $status  $($m.Path)$gpu" -ForegroundColor Gray
         Write-Host ''
     }
 
@@ -323,6 +329,14 @@ $processArgs = @(
     '--repeat-penalty', $REPEAT_PENALTY.ToString('F2', [System.Globalization.CultureInfo]::InvariantCulture)
 )
 
+# GPU offload — adicionar logo após o bloco $processArgs = @( ... )
+if ($MODEL.GpuLayers -and $MODEL.GpuLayers -gt 0) {
+    $processArgs += '--n-gpu-layers'
+    $processArgs += $MODEL.GpuLayers
+    Write-Host "GPU offload: $($MODEL.GpuLayers) camadas" -ForegroundColor Cyan
+}
+
+
 if ($MODEL.Template -ne 'auto') {
     if ($MODEL.Template -like '*.jinja') {
         $templatePath = Join-Path $PSScriptRoot $MODEL.Template
@@ -390,6 +404,9 @@ if ($ready) {
     Write-Host 'Parametros de geracao aplicados:'
     Write-Host "  Temperature:      $TEMPERATURE"
     Write-Host "  Repeat Penalty:   $REPEAT_PENALTY"
+    if ($MODEL.GpuLayers -and $MODEL.GpuLayers -gt 0) {
+        Write-Host "  GPU Layers:       $($MODEL.GpuLayers) (offload ativo)" -ForegroundColor Cyan
+    }
     Write-Host ''
     Write-Host 'Configuracao para o Cline no VS Code:'
     Write-Host "  API Provider:     OpenAI Compatible"
