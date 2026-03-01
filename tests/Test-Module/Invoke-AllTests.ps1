@@ -43,7 +43,7 @@ function Invoke-AllTests {
   Write-Host ""
 
   $systemPrompt = "You are a precise coding assistant."
-  $results = @()
+  $results = @{}
   $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
   # Limpa o arquivo de saída
@@ -101,7 +101,7 @@ Max Tokens   : $MaxTokens
     }
     catch {
       Write-Host "  ❌ ERRO: $($_.Exception.Message)" -ForegroundColor Red
-      $results += @{
+      $results[$testName] = @{
         Test    = $testName
         Prompt  = $prompt
         Success = $false
@@ -159,7 +159,7 @@ Max Tokens   : $MaxTokens
 
     Write-Host "  ✅ Concluído: $predictTokens tokens | ${wallClock}s | ${predictTps} t/s" -ForegroundColor Green
 
-    $results += @{
+    $results[$testName] = @{
       Test         = $testName
       Prompt       = $prompt
       Success      = $true
@@ -201,7 +201,8 @@ Stop Reason   : $stopReason $truncatedWarn
   $totalTime = 0
   $totalTokens = 0
 
-  foreach ($r in $results) {
+  foreach ($key in $results.Keys) {
+    $r = $results[$key]
     if ($r.Success) {
       $totalTime += $r.Time
       $totalTokens += $r.Tokens
@@ -216,7 +217,8 @@ RESUMO DOS TESTES
 ================================================================================
 "
 
-    foreach ($r in $results) {
+    foreach ($key in $results.Keys) {
+        $r = $results[$key]
         if ($r.Success) {
             $summary += "`n  ✅ $($r.Test): $($r.Tokens) tokens | $($r.Time)s | $($r.Speed) t/s"
         }
@@ -241,7 +243,8 @@ RESUMO DOS TESTES
   Write-Host "  RESUMO DOS TESTES" -ForegroundColor Cyan
   Write-Host "═══════════════════════════════════════════════════════════" -ForegroundColor Cyan
 
-  foreach ($r in $results) {
+  foreach ($key in $results.Keys) {
+    $r = $results[$key]
     if ($r.Success) {
       Write-Host "  ✅ $($r.Test): $($r.Tokens) tokens | $($r.Time)s | $($r.Speed) t/s" -ForegroundColor Green
     }
