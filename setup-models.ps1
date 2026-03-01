@@ -81,44 +81,44 @@ $script:paths = $null
 # Tamanhos baseados no tamanho REAL dos arquivos no Hugging Face
 $models = @(
     @{
-        Id = "1"
-        Name = "qwen2.5-coder-0.5b-instruct"
-        DisplayName = "Qwen2.5-Coder 0.5B"
-        File = "qwen2.5-coder-0.5b-instruct-q4_k_m.gguf"
-        Url = "https://huggingface.co/bartowski/Qwen2.5-Coder-0.5B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-0.5B-Instruct-Q4_K_M.gguf"
+        Id             = "1"
+        Name           = "qwen2.5-coder-0.5b-instruct"
+        DisplayName    = "Qwen2.5-Coder 0.5B"
+        File           = "qwen2.5-coder-0.5b-instruct-q4_k_m.gguf"
+        Url            = "https://huggingface.co/bartowski/Qwen2.5-Coder-0.5B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-0.5B-Instruct-Q4_K_M.gguf"
         ExpectedSizeMB = 379  # Tamanho REAL do arquivo Q4_K_M
-        SizeDesc = "379 MB"
-        Description = "Modelo pequeno (0.5B), rápido para testes e desenvolvimento"
+        SizeDesc       = "379 MB"
+        Description    = "Modelo pequeno (0.5B), rápido para testes e desenvolvimento"
     },
     @{
-        Id = "2"
-        Name = "qwen2.5-3b-instruct"
-        DisplayName = "Qwen2.5-3B Instruct"
-        File = "Qwen2.5-3B-Instruct-Q4_K_M.gguf"
-        Url = "https://huggingface.co/bartowski/Qwen2.5-3B-Instruct-GGUF/resolve/main/Qwen2.5-3B-Instruct-Q4_K_M.gguf"
+        Id             = "2"
+        Name           = "qwen2.5-3b-instruct"
+        DisplayName    = "Qwen2.5-3B Instruct"
+        File           = "Qwen2.5-3B-Instruct-Q4_K_M.gguf"
+        Url            = "https://huggingface.co/bartowski/Qwen2.5-3B-Instruct-GGUF/resolve/main/Qwen2.5-3B-Instruct-Q4_K_M.gguf"
         ExpectedSizeMB = 1976
-        SizeDesc = "1.93 GB"
-        Description = "Recomendado: Melhor balanço entre velocidade e inteligência (6GB VRAM)"
+        SizeDesc       = "1.93 GB"
+        Description    = "Recomendado: Melhor balanço entre velocidade e inteligência (6GB VRAM)"
     },
     @{
-        Id = "3"
-        Name = "deepseek-coder-6.7b-instruct"
-        DisplayName = "deepseek-coder 6.7B"
-        File = "deepseek-coder-6.7b-instruct-q4_k_m.gguf"
-        Url = "https://huggingface.co/TheBloke/deepseek-coder-6.7B-instruct-GGUF/resolve/main/deepseek-coder-6.7b-instruct.Q4_K_M.gguf"
+        Id             = "3"
+        Name           = "deepseek-coder-6.7b-instruct"
+        DisplayName    = "deepseek-coder 6.7B"
+        File           = "deepseek-coder-6.7b-instruct-q4_k_m.gguf"
+        Url            = "https://huggingface.co/TheBloke/deepseek-coder-6.7B-instruct-GGUF/resolve/main/deepseek-coder-6.7b-instruct.Q4_K_M.gguf"
         ExpectedSizeMB = 4175  # Tamanho REAL do arquivo Q4_K_M
-        SizeDesc = "4.08 GB"
-        Description = "Modelo grande (6.7B), alta qualidade para produção"
+        SizeDesc       = "4.08 GB"
+        Description    = "Modelo grande (6.7B), alta qualidade para produção"
     },
     @{
-        Id = "4"
-        Name = "qwen2.5-coder-7b-instruct"
-        DisplayName = "Qwen2.5-Coder 7B"
-        File = "qwen2.5-coder-7b-instruct-q4_k_m.gguf"
-        Url = "https://huggingface.co/Triangle104/Qwen2.5-Coder-7B-Instruct-Q4_K_M-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf"
+        Id             = "4"
+        Name           = "qwen2.5-coder-7b-instruct"
+        DisplayName    = "Qwen2.5-Coder 7B"
+        File           = "qwen2.5-coder-7b-instruct-q4_k_m.gguf"
+        Url            = "https://huggingface.co/stefancosma/Qwen2.5-Coder-7B-Instruct-Q4_K_M-GGUF/resolve/main/qwen2.5-coder-7b-instruct-q4_k_m.gguf"
         ExpectedSizeMB = 4800  # Tamanho REAL do arquivo Q4_K_M (aproximadamente 4.68 GB)
-        SizeDesc = "4.68 GB"
-        Description = "Modelo grande (7B), alta qualidade para desenvolvimento avançado"
+        SizeDesc       = "4.68 GB"
+        Description    = "Modelo grande (7B), alta qualidade para desenvolvimento avançado"
     }
 )
 
@@ -256,10 +256,10 @@ function Check-ExistingFile {
     
     if ($foundFiles.Count -eq 0) {
         return @{
-            Exists = $false
-            SizeMB = 0
+            Exists   = $false
+            SizeMB   = 0
             Complete = $false
-            Reason = "Arquivo não encontrado"
+            Reason   = "Arquivo não encontrado"
             FilePath = Join-Path $ModelPath $ExpectedFileName
         }
     }
@@ -278,19 +278,20 @@ function Check-ExistingFile {
     
     $reason = if ($isComplete) {
         "Tamanho correto ($sizeMB MB = $percentComplete% de $expectedSizeMB MB)"
-    } else {
+    }
+    else {
         "Tamanho incompleto ($sizeMB MB = $percentComplete% de $expectedSizeMB MB)"
     }
     
     return @{
-        Exists = $true
-        SizeMB = $sizeMB
-        ExpectedSizeMB = $expectedSizeMB
+        Exists          = $true
+        SizeMB          = $sizeMB
+        ExpectedSizeMB  = $expectedSizeMB
         PercentComplete = $percentComplete
-        Complete = $isComplete
-        Reason = $reason
-        FilePath = $filePath
-        FileName = $file.Name
+        Complete        = $isComplete
+        Reason          = $reason
+        FilePath        = $filePath
+        FileName        = $file.Name
     }
 }
 
@@ -329,7 +330,7 @@ function Download-With-Aria2 {
             }
             
             return @{
-                Success = $true
+                Success  = $true
                 FilePath = Join-Path $ModelPath $ExpectedFileName
             }
         }
@@ -374,13 +375,14 @@ function Download-With-Aria2 {
                 }
                 
                 return @{
-                    Success = $true
+                    Success  = $true
                     FilePath = Join-Path $ModelPath $ExpectedFileName
                 }
-            } else {
+            }
+            else {
                 Write-Warning "AVISO: Download concluido, mas arquivo parece incompleto ($($finalCheck.SizeMB) MB de $($finalCheck.ExpectedSizeMB) MB)"
                 return @{
-                    Success = $false
+                    Success  = $false
                     FilePath = $finalCheck.FilePath
                 }
             }
@@ -388,7 +390,7 @@ function Download-With-Aria2 {
         else {
             Write-Error "ERROR: aria2c falhou com codigo: $($process.ExitCode)"
             return @{
-                Success = $false
+                Success  = $false
                 FilePath = Join-Path $ModelPath $ExpectedFileName
             }
         }
@@ -396,7 +398,7 @@ function Download-With-Aria2 {
     catch {
         Write-Error "ERROR: Erro ao executar aria2c: $_"
         return @{
-            Success = $false
+            Success  = $false
             FilePath = Join-Path $ModelPath $ExpectedFileName
         }
     }
