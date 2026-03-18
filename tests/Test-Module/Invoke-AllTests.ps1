@@ -135,6 +135,8 @@ function Invoke-AllTests {
     $answer = $response.choices[0].message.content ?? $response.choices[0].text ?? ""
 
     Write-Host "  ✅ Concluído: $predictTokens tokens | ${wallClock}s | ${predictTps} t/s" -ForegroundColor Green
+    Write-Host "  Resposta:" -ForegroundColor Gray
+    Write-Host $answer -ForegroundColor Gray
 
     $results[$testName] = @{
       Test         = $testName
