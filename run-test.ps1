@@ -69,28 +69,36 @@ Write-Host ""
 # Encontra o script de teste correspondente ao modelo
 Write-Host "Procurando script de teste para o modelo: $activeModel" -ForegroundColor Yellow
 
-# Extrai o nome base do modelo para encontrar o script
-# Ex: Qwen2.5-3B-Instruct-Q4_K_M.gguf -> qwen2.5-3b
 $modelNameLower = $activeModel.ToLower()
+$allTestScripts = Get-ChildItem -Path $testDir -Filter "test-*.ps1" -File
 $testScript = $null
 
-# Tenta encontrar um script que corresponda ao nome do modelo
-$allTestScripts = Get-ChildItem -Path $testDir -Filter "test-*.ps1" -File
+# Estágio 1 — Match exato
 foreach ($script in $allTestScripts) {
-    $scriptName = $script.Name.ToLower()
-    # Remove extensão e prefixo para comparar
-    $scriptModelName = $scriptName -replace '^test-', '' -replace '\.ps1$', ''
-    
-    # Verifica se o nome do modelo contém o nome do script ou vice-versa
-    if ($modelNameLower.Contains($scriptModelName) -or $scriptModelName.Contains($modelNameLower.Split('.')[0])) {
+    $scriptKey = $script.Name.ToLower() -replace '^test-', '' -replace '\.ps1$', ''
+    if ($modelNameLower.Contains($scriptKey)) {
         $testScript = $script
-        Write-Host "✅ Script encontrado: $($script.Name)" -ForegroundColor Green
+        Write-Host "✅ Script encontrado (match exato): $($script.Name)" -ForegroundColor Green
         break
     }
 }
 
+# Estágio 2 — Match por família
 if (-not $testScript) {
-    Write-Host "❌ Nenhum script de teste encontrado para o modelo: $activeModel" -ForegroundColor Red
+    $modelFamily = ($modelNameLower -split '[-_\d]')[0]
+    foreach ($script in $allTestScripts) {
+        $scriptKey = $script.Name.ToLower() -replace '^test-', '' -replace '\.ps1$', ''
+        $scriptFamily = ($scriptKey -split '[-_\d]')[0]
+        if ($scriptFamily -eq $modelFamily) {
+            $testScript = $script
+            Write-Host "✅ Script encontrado (match família '$modelFamily'): $($script.Name)" -ForegroundColor Green
+            break
+        }
+    }
+}
+
+if (-not $testScript) {
+    Write-Host "❌ Nenhum script de teste encontrado para: $activeModel" -ForegroundColor Red
     Write-Host "Scripts disponíveis:" -ForegroundColor Yellow
     foreach ($script in $allTestScripts) {
         Write-Host "  - $($script.Name)" -ForegroundColor Gray

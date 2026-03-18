@@ -72,6 +72,7 @@ Para quem já tem o ambiente configurado — os 4 comandos do dia a dia:
 .\start-llama-server.ps1
 
 # 3. Testar (opcional, em outro terminal)
+# configurar no .env a url da url do servidor llama.cpp
 cp .env.example .env
 .\run-test.ps1
 
@@ -83,7 +84,7 @@ cp .env.example .env
 
 ## Pré-requisitos
 
-- Windows 10/11 com PowerShell 5.1+ (recomendado PowerShell 7)
+- Windows 11 com PowerShell recomendado PowerShell 7 - Foco no PowerShell
 - GPU NVIDIA com suporte a CUDA 12.4 ou 13.1
 - Mínimo **6 GB de VRAM**
 - ~5 GB de espaço em disco
@@ -99,7 +100,7 @@ cp .env.example .env
 O script abaixo detecta automaticamente a versão de CUDA suportada pelo seu driver e usa aria2c para download paralelo:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\setup_llama_cpp_cuda12_cuda_13_aria2c.ps1
+powershell -ExecutionPolicy Bypass -File .\script.ps1
 ```
 
 O script irá:
