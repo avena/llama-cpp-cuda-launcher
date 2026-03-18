@@ -7,13 +7,23 @@ schema: v1
 
 # === MODELS ===
 models:
+  - name:  Qwen2.5-Coder 0.5B Instruct
+    provider: openai
+    model: qwen2.5-coder-0.5b-instruct-q4_k_m.gguf
+    apiBase: ${{ secrets.LLAMA_SERVER_URL }}
+    apiKey: sk-no-key-required
   - name: DeepSeek Coder Local
     provider: openai
     model: deepseek-coder-6.7b-instruct-q4_k_m.gguf
     apiBase: ${{ secrets.LLAMA_SERVER_URL }}
     apiKey: sk-no-key-required
-  - name: Qwen2.5 3B Instruct
+  - name: Qwen2.5 3B 
     provider: openai
     model: qwen2.5-3b-instruct-q4_k_m.gguf
+    apiBase: ${{ secrets.LLAMA_SERVER_URL }}
+    apiKey: sk-no-key-required
+  - name: Qwen2.5-Coder 7B
+    provider: openai
+    model: qwen2.5-coder-7b-instruct-q4_k_m.gguf
     apiBase: ${{ secrets.LLAMA_SERVER_URL }}
     apiKey: sk-no-key-required

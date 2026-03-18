@@ -2,12 +2,15 @@
 
 function Load-Env {
     param(
-        [string]$EnvPath = ".env"
+        [string]$EnvPath = ".env",
+        [switch]$Silent
     )
     
     # Verifica se o arquivo .env existe
     if (Test-Path $EnvPath) {
-        Write-Host "Carregando configurações de: $EnvPath" -ForegroundColor Cyan
+        if (-not $Silent) {
+            Write-Host "Carregando configurações de: $EnvPath" -ForegroundColor Cyan
+        }
         
         # Lê o arquivo .env linha por linha
         Get-Content $EnvPath | ForEach-Object {
@@ -29,7 +32,9 @@ function Load-Env {
                     
                     # Define a variável de ambiente
                     [Environment]::SetEnvironmentVariable($key, $value, "Process")
-                    Write-Host "  $key = $value" -ForegroundColor Gray
+                    if (-not $Silent) {
+                        Write-Host "  $key = $value" -ForegroundColor Gray
+                    }
                 }
             }
         }
@@ -40,4 +45,4 @@ function Load-Env {
 }
 
 # Carrega o .env na raiz do projeto
-Load-Env -EnvPath ".env"
+Load-Env -EnvPath ".env" -Silent

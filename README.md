@@ -97,7 +97,7 @@ cp .env.example .env
 
 ### Passo 1 — Instalar o llama.cpp
 
-O script de instalação detecta automaticamente a versão de CUDA suportada pelo seu driver e usa aria2c para download paralelo. 
+O script de instalação detecta automaticamente a versão de CUDA suportada pelo seu driver e usa aria2c para download paralelo.
 
 > **Nota:** Os scripts de instalação e configurações iniciais foram movidos para a pasta `docs/old-scripts/` para manter a raiz limpa.
 
@@ -421,7 +421,6 @@ cp .env.example .env
 
 | Script                               | Modelo                    |
 | ------------------------------------ | ------------------------- |
-| `tests/test-qwen2.5-3b.ps1`          | Qwen2.5-3B-Instruct       |
 | `tests/test-qwen2.5-coder-0.5b.ps1`  | Qwen2.5-Coder-0.5B        |
 | `tests/test-qwen2.5-coder-7b.ps1`    | Qwen2.5-Coder-7B-Instruct |
 | `tests/test-deepseek-coder-6.7b.ps1` | DeepSeek-Coder-6.7B       |

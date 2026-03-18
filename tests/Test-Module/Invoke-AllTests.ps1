@@ -31,11 +31,6 @@ function Invoke-AllTests {
     return $false
   }
 
-  # Gera nome do arquivo de saída se não fornecido
-  if (-not $OutputFile) {
-    $OutputFile = "test-all-$($ModelLabel.ToLower() -replace '[^a-zA-Z0-9]', '-').txt"
-  }
-
   Write-Host ""
   Write-Host "═══════════════════════════════════════════════════════════" -ForegroundColor Cyan
   Write-Host "  EXECUTANDO TODOS OS TESTES ($($ModelLabel))" -ForegroundColor Cyan
@@ -45,24 +40,6 @@ function Invoke-AllTests {
   $systemPrompt = "You are a precise coding assistant."
   $results = @{}
   $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-
-  # Limpa o arquivo de saída
-  "" | Out-File -FilePath $OutputFile -Encoding UTF8
-
-  # Cabeçalho inicial
-  $header = @"
-================================================================================
-ALL TESTS REPORT — llama.cpp API
-================================================================================
-Timestamp    : $timestamp
-Model        : $ModelLabel
-Server URL   : $BaseUrl
-Temperature  : $Temperature
-Max Tokens   : $MaxTokens
-================================================================================
-
-"@
-  $header | Out-File -FilePath $OutputFile -Encoding UTF8
 
   # Executa cada pergunta
   for ($i = 1; $i -le 5; $i++) {
@@ -170,31 +147,6 @@ Max Tokens   : $MaxTokens
       TotalMs      = $totalMs
       StopReason   = $stopReason
     }
-
-    # Salva resultado individual no arquivo usando o mesmo template
-    $report = @"
-================================================================================
-TEST: $testName
-================================================================================
-PROMPT
---------------------------------------------------------------------------------
-$prompt
---------------------------------------------------------------------------------
-RESPONSE
---------------------------------------------------------------------------------
-$answer
---------------------------------------------------------------------------------
-PERFORMANCE METRICS
---------------------------------------------------------------------------------
-Prompt Tokens  : $promptTokens
-Generation    : $predictTokens tokens
-Time          : ${wallClock} s (${predictTps} t/s)
-Total         : ${totalMs} ms
-Stop Reason   : $stopReason $truncatedWarn
-================================================================================
-
-"@
-    $report | Out-File -FilePath $OutputFile -Encoding UTF8 -Append
   }
 
   # Resumo final
@@ -232,8 +184,6 @@ Stop Reason   : $stopReason $truncatedWarn
   $summary += "  Total: $totalTokens tokens em ${totalTime}s (média: ${avgSpeed} t/s)`n"
   $summary += "=" * 80 + "`n"
 
-  $summary | Out-File -FilePath $OutputFile -Encoding UTF8 -Append
-
   Write-Host ""
   Write-Host "═══════════════════════════════════════════════════════════" -ForegroundColor Cyan
   Write-Host "  RESUMO DOS TESTES" -ForegroundColor Cyan
@@ -251,7 +201,6 @@ Stop Reason   : $stopReason $truncatedWarn
 
   Write-Host ""
   Write-Host "  Total: $($totalTokens) tokens em ${totalTime}s (média: ${avgSpeed} t/s)" -ForegroundColor Cyan
-  Write-Host "  ✔ Salvo em: $OutputFile" -ForegroundColor Green
   Write-Host ""
 
   return $true

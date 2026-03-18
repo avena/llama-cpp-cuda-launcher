@@ -14,7 +14,7 @@ param(
 )
 
 # Carrega variáveis de ambiente e funções core
-. "$PSScriptRoot\..\load-env.ps1"
+. "$PSScriptRoot\..\load-env.ps1" -Silent
 . "$PSScriptRoot\_test-core.ps1"
 
 function Get-QwenProfile {

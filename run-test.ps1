@@ -6,10 +6,24 @@ param(
 )
 
 # Carrega variáveis de ambiente do .env
-. "$PSScriptRoot\load-env.ps1"
+. "$PSScriptRoot\load-env.ps1" -Silent
 
 # Configuração
 $testDir = Join-Path -Path $PSScriptRoot -ChildPath "tests"
+
+# Gera timestamp para nome do arquivo
+$timestamp = Get-Date -Format "dd-MM-yyyy_HH-mm-ss"
+$modelBase = "test-all-qwen2-5-coder-0-5b-instruct-q4-k-m-gguf"
+$logPath = Join-Path -Path $PSScriptRoot -ChildPath "logs"
+$logFile = Join-Path -Path $logPath -ChildPath "$modelBase-$timestamp.txt"
+
+# Verifica se diretório de logs existe
+if (-not (Test-Path $logPath)) {
+    New-Item -ItemType Directory -Path $logPath | Out-Null
+}
+
+# Redireciona toda a saída para arquivo de log (suprime mensagem inicial)
+Start-Transcript -Path $logFile -Force | Out-Null
 
 # Usa LLAMA_SERVER_URL do .env
 $baseUrl = $env:LLAMA_SERVER_URL
@@ -121,14 +135,22 @@ try {
 
     if ($?) {
         Write-Host "✅ Teste concluído com sucesso!" -ForegroundColor Green
+        Stop-Transcript | Out-Null
         exit 0
     }
     else {
         Write-Host "❌ Teste falhou." -ForegroundColor Red
+        Stop-Transcript | Out-Null
         exit 1
     }
 }
 catch {
+    Stop-Transcript | Out-Null
     Write-Host "❌ Erro ao executar teste: $($_.Exception.Message)" -ForegroundColor Red
+    
+    # Adiciona o erro fatal ao final do arquivo de log para debug
+    $ErrorMessage = "`n`n============================================================`nFATAL ERROR`n============================================================`n$($_ | Out-String)"
+    $ErrorMessage | Add-Content -Path $logFile
+    
     exit 1
 }
