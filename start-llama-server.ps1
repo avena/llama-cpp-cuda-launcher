@@ -17,7 +17,12 @@ Import-Module "$PSScriptRoot\lib\LlamaServer.psm1" -Force
 
 $PORT = 8080
 $API_HOST = '0.0.0.0'
-$LOG_FILE = "$env:TEMP\llama-server.log"
+
+# Configuracao de logs com data no nome
+$LOG_DIR = Join-Path $PSScriptRoot 'logs'
+if (!(Test-Path $LOG_DIR)) { New-Item -ItemType Directory -Path $LOG_DIR | Out-Null }
+$DATE = Get-Date -Format 'yyyy-MM-dd_HHmmss'
+$LOG_FILE = Join-Path $LOG_DIR "llama-server_$DATE.log"
 
 # ============================================================================
 # SELECAO DO MODELO

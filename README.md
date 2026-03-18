@@ -32,7 +32,7 @@ Configure seu ambiente Windows antes de começar. Esta seção instala o PowerSh
 winget install Microsoft.PowerShell
 
 # Definir como padrão
-powershell -ExecutionPolicy Bypass -File .\Set-PowerShell7AsDefault.ps1
+powershell -ExecutionPolicy Bypass -File .\docs\old-scripts\Set-PowerShell7AsDefault.ps1
 ```
 
 ### Passo 2 — Scoop (opcional mas recomendado)
@@ -97,10 +97,14 @@ cp .env.example .env
 
 ### Passo 1 — Instalar o llama.cpp
 
-O script abaixo detecta automaticamente a versão de CUDA suportada pelo seu driver e usa aria2c para download paralelo:
+O script de instalação detecta automaticamente a versão de CUDA suportada pelo seu driver e usa aria2c para download paralelo. 
+
+> **Nota:** Os scripts de instalação e configurações iniciais foram movidos para a pasta `docs/old-scripts/` para manter a raiz limpa.
+
+Para instalar, execute o script principal de instalação (exemplo usando o caminho atualizado):
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\script.ps1
+powershell -ExecutionPolicy Bypass -File .\docs\old-scripts\setup_llama_cpp_cuda12_cuda_13_aria2c.ps1
 ```
 
 O script irá:
@@ -110,7 +114,7 @@ O script irá:
 - Extrair para `[DISCO]:\llama-cpp-cuda124` ou `cuda131`
 
 <details>
-<summary>Alternativas de instalação (scripts legados)</summary>
+<summary>Alternativas de instalação (scripts em docs/old-scripts/)</summary>
 
 | Script                               | Quando usar                     |
 | ------------------------------------ | ------------------------------- |
