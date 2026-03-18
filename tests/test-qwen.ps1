@@ -28,7 +28,7 @@ function Get-QwenProfile {
     # Define perfil com base no tamanho
     switch ($sizeInB) {
       { $_ -le 0.5 } {
-        return @{ MaxTokens = 512; Temperature = 0.3; Label = "0.5B (leve)" }
+        return @{ MaxTokens = 768; Temperature = 0.3; Label = "0.5B (leve)" }
       }
       { $_ -le 1.5 } {
         return @{ MaxTokens = 768; Temperature = 0.3; Label = "1.5B" }
