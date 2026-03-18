@@ -26,8 +26,8 @@ function Build-ServerArgs {
     '--metrics',
     '--batch-size', '512',
     '--ubatch-size', '512',
-    '--temp', $Temperature.ToString('F2', [cultureinfo]::InvariantCulture),
-    '--repeat-penalty', $RepeatPenalty.ToString('F2', [cultureinfo]::InvariantCulture)
+    '--temp', $Temperature.ToString('F2', [System.Globalization.CultureInfo]::InvariantCulture),
+    '--repeat-penalty', $RepeatPenalty.ToString('F2', [System.Globalization.CultureInfo]::InvariantCulture)
   )
 
   # GPU offload
@@ -36,13 +36,21 @@ function Build-ServerArgs {
     Write-Host "GPU offload ativo: $($Model.GpuLayers) camadas" -ForegroundColor Cyan
   }
 
-  # Chat template — sempre arquivo .jinja
-  $tplPath = Join-Path $ScriptRoot $Model.Template
-  if (!(Test-Path $tplPath)) {
-    throw "Template nao encontrado: $tplPath`nCrie o arquivo ou corrija Template em config/models.ps1"
+  # Chat template
+  if ($Model.Template -and $Model.Template -ne 'auto') {
+    if ($Model.Template -like '*.jinja') {
+      $tplPath = Join-Path $ScriptRoot $Model.Template
+      if (!(Test-Path $tplPath)) {
+        throw "Template nao encontrado: $tplPath`nCrie o arquivo ou corrija Template em config/models.ps1"
+      }
+      $args += '--chat-template-file', $tplPath
+      Write-Host "Template (file): $($Model.Template)" -ForegroundColor Gray
+    }
+    else {
+      $args += '--chat-template', $Model.Template
+      Write-Host "Template (built-in): $($Model.Template)" -ForegroundColor Gray
+    }
   }
-  $args += '--chat-template-file', $tplPath
-  Write-Host "Template:  $($Model.Template)" -ForegroundColor Gray
 
   return $args
 }

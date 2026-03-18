@@ -35,7 +35,7 @@ Contém a lógica modularizada em PowerShell usada pelos scripts principais.
 Centraliza as definições de modelos e templates de chat.
 
 *   `models.ps1`: Catálogo de modelos suportados, caminhos de arquivos e parâmetros padrão (Contexto, GPU Layers, etc).
-*   `chat-templates/`: Contém arquivos `.jinja` para formatação de prompts específica de cada modelo (ChatML, DeepSeek, etc).
+*   `chat-templates/`: Contém arquivos `.jinja` para formatação de prompts. Seguimos a estratégia de **um template por arquivo de modelo** (ex: `qwen2.5-coder-7b-instruct-q4_k_m.jinja`) para garantir precisão absoluta nas tags de controle (`<|im_start|>`, etc) e evitar conflitos entre versões ou quantizações.
 
 ### `tests/` (Suíte de Testes)
 Ambiente para validação de performance e fidelidade dos modelos.
