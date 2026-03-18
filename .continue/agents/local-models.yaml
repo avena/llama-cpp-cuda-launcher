@@ -1,6 +1,18 @@
 # Continue.dev Configuration - DeepSeek Coder 6.7B Local
 # Docs: https://docs.continue.dev/reference
 
+# === SECRETS ===
+# As variáveis usadas neste arquivo (${{ secrets.* }}) são lidas do arquivo:
+#   C:\Users\<username>\.continue\.env
+#
+# Exemplo de conteúdo do ~/.continue/.env:
+#   OPENROUTER_API_KEY=sk-or-...
+#   OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+#   LLAMA_SERVER_URL=http://127.0.0.1:8080
+#   LLAMA_SERVER_URL=http://192.168.60.6:8080
+#
+# Nunca commitar o ~/.continue/.env — ele fica fora do projeto.
+
 name: Local Model Config
 version: 1.0.0
 schema: v1
@@ -12,18 +24,22 @@ models:
     model: qwen2.5-coder-0.5b-instruct-q4_k_m.gguf
     apiBase: ${{ secrets.LLAMA_SERVER_URL }}
     apiKey: sk-no-key-required
+    systemMessage: "You are a precise coding assistant. Answer only with code and brief explanations."
   - name: DeepSeek Coder Local
     provider: openai
     model: deepseek-coder-6.7b-instruct-q4_k_m.gguf
     apiBase: ${{ secrets.LLAMA_SERVER_URL }}
     apiKey: sk-no-key-required
+    systemMessage: "You are a precise coding assistant. Answer only with code and brief explanations."
   - name: Qwen2.5 3B 
     provider: openai
     model: qwen2.5-3b-instruct-q4_k_m.gguf
     apiBase: ${{ secrets.LLAMA_SERVER_URL }}
     apiKey: sk-no-key-required
+    systemMessage: "You are a precise coding assistant. Answer only with code and brief explanations."
   - name: Qwen2.5-Coder 7B
     provider: openai
     model: qwen2.5-coder-7b-instruct-q4_k_m.gguf
     apiBase: ${{ secrets.LLAMA_SERVER_URL }}
     apiKey: sk-no-key-required
+    systemMessage: "You are a precise coding assistant. Answer only with code and brief explanations."

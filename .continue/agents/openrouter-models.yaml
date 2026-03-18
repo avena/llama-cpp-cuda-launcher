@@ -1,0 +1,103 @@
+# Continue.dev Configuration - OpenRouter Cloud Models
+# Docs: https://docs.continue.dev/reference
+# Chave de API: https://openrouter.ai/keys
+#
+# === SECRETS ===
+# As variáveis usadas neste arquivo (${{ secrets.* }}) são lidas do arquivo:
+#   C:\Users\<username>\.continue\.env
+#
+# Exemplo de conteúdo do ~/.continue/.env:
+#   OPENROUTER_API_KEY=sk-or-...
+#   OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+#   LLAMA_SERVER_URL=http://127.0.0.1:8080
+#
+# Nunca commitar o ~/.continue/.env — ele fica fora do projeto.
+
+# === FLUXO RECOMENDADO ===
+# 1. Free Models Router  — tarefas do dia a dia (seleciona automaticamente um modelo gratuito)
+# 2. Qwen3 Coder 480B    — tarefas de código mais complexas, ainda gratuito
+# 3. Llama 3.3 70B       — alternativa gratuita robusta para raciocínio geral
+# 4. Claude / GPT-4o     — qualidade máxima, uso pontual (custo por token)
+
+name: OpenRouter Cloud Models
+version: 1.0.0
+schema: v1
+
+# === MODELS ===
+models:
+  - name: Free Models Router
+    provider: openai
+    model: openrouter/free
+    apiBase: ${{ secrets.OPENROUTER_BASE_URL }}
+    apiKey: ${{ secrets.OPENROUTER_API_KEY }}
+    systemMessage: "You are a precise coding assistant. Answer only with code and brief explanations."
+
+  # Tool calling: forte | Especializado em agentes de código | Melhor opção gratuita para agente
+  - name: Qwen3 Coder 480B (free)
+    provider: openai
+    model: qwen/qwen3-coder-480b-a35b:free
+    apiBase: ${{ secrets.OPENROUTER_BASE_URL }}
+    apiKey: ${{ secrets.OPENROUTER_API_KEY }}
+    systemMessage: "You are a precise coding assistant. Answer only with code and brief explanations."
+
+  # Tool calling: forte | Popular e estável | Boa alternativa gratuita para agente
+  - name: NVIDIA Nemotron 3 Super 445B (free)
+    provider: openai
+    model: nvidia/nemotron-3-super-120b-a12b:free
+    apiBase: ${{ secrets.OPENROUTER_BASE_URL }}
+    apiKey: ${{ secrets.OPENROUTER_API_KEY }}
+    systemMessage: "You are a precise coding assistant. Answer only with code and brief explanations."
+
+  # Tool calling: confiável | Llama 3.x maduro | Bom para raciocínio geral e agente
+  - name: Llama 3.3 70B (free)
+    provider: openai
+    model: meta-llama/llama-3.3-70b-instruct:free
+    apiBase: ${{ secrets.OPENROUTER_BASE_URL }}
+    apiKey: ${{ secrets.OPENROUTER_API_KEY }}
+    systemMessage: "You are a precise coding assistant. Answer only with code and brief explanations."
+
+  # Tool calling: bom | Function calling nativo | Leve e rápido para agentes simples
+  - name: Mistral Small 3.1 24B (free)
+    provider: openai
+    model: mistralai/mistral-small-3.1-24b-instruct:free
+    apiBase: ${{ secrets.OPENROUTER_BASE_URL }}
+    apiKey: ${{ secrets.OPENROUTER_API_KEY }}
+    systemMessage: "You are a precise coding assistant. Answer only with code and brief explanations."
+
+  # Tool calling: fraco | Muito pequeno para agente | Bom para respostas rápidas e simples
+  - name: Qwen3 4B (free)
+    provider: openai
+    model: qwen/qwen3-4b:free
+    apiBase: ${{ secrets.OPENROUTER_BASE_URL }}
+    apiKey: ${{ secrets.OPENROUTER_API_KEY }}
+    systemMessage: "You are a precise coding assistant. Answer only with code and brief explanations."
+
+  # Tool calling: forte | Melhor qualidade geral | Uso pontual — custo por token
+  - name: Claude 3.5 Sonnet
+    provider: openai
+    model: anthropic/claude-3.5-sonnet
+    apiBase: ${{ secrets.OPENROUTER_BASE_URL }}
+    apiKey: ${{ secrets.OPENROUTER_API_KEY }}
+    systemMessage: "You are a precise coding assistant. Answer only with code and brief explanations."
+
+  # Tool calling: forte | Rápido e econômico | Boa relação custo/qualidade para agente
+  - name: GPT-4o Mini
+    provider: openai
+    model: openai/gpt-4o-mini
+    apiBase: ${{ secrets.OPENROUTER_BASE_URL }}
+    apiKey: ${{ secrets.OPENROUTER_API_KEY }}
+    systemMessage: "You are a precise coding assistant. Answer only with code and brief explanations."
+
+  - name: Gemini Flash 2.0 (free)
+    provider: openai
+    model: google/gemini-flash-2.0
+    apiBase: ${{ secrets.OPENROUTER_BASE_URL }}
+    apiKey: ${{ secrets.OPENROUTER_API_KEY }}
+    systemMessage: "You are a precise coding assistant. Answer only with code and brief explanations."
+
+  - name: DeepSeek R1 (free)
+    provider: openai
+    model: deepseek/deepseek-r1:free
+    apiBase: ${{ secrets.OPENROUTER_BASE_URL }}
+    apiKey: ${{ secrets.OPENROUTER_API_KEY }}
+    systemMessage: "You are a precise coding assistant. Answer only with code and brief explanations."
