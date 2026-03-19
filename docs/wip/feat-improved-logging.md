@@ -6,6 +6,10 @@ Melhorar a observabilidade do `start-llama-server.ps1` implementando uma estrat�
 
 ## Current State (Estado Atual)
 
+Melhorar a observabilidade do `start-llama-server.ps1` implementando uma estratégia de logging robusta, similar à utilizada no `run-test.ps1`. O objetivo é garantir que cada execução do servidor gere um arquivo de log único, identificável pelo modelo e horário, facilitando o diagnóstico de erros (como falhas de inicialização ou saídas corrompidas).
+
+## Current State (Estado Atual)
+
 - O script `start-llama-server.ps1` define o arquivo de log **antes** de saber qual modelo será selecionado.
 - Nome atual: `logs/llama-server_YYYY-MM-DD_HHmmss.log`.
 - Problema: O nome é genérico. Se o usuário rodar vários testes, não dá para saber qual log pertence a qual modelo sem abrir o arquivo.
@@ -58,13 +62,6 @@ Adaptar a estratégia de logging do `run-test.ps1` para o `start-llama-server.ps
 - [ ] Verificar se o arquivo de log foi criado em `logs/` com o nome correto (modelo + timestamp).
 - [ ] Inspecionar o conteúdo do log para confirmar se stdout e stderr foram capturados.
 - [ ] Simular um erro (ex: modelo inexistente) e verificar se o feedback no console e o log são informativos.
-
-### Fase 5: Verificação de Integridade do Modelo
-
-- [ ] Adicionar verificação de hash SHA256 do arquivo modelo antes de iniciar o servidor.
-- [ ] Comparar o hash calculado com o hash fornecido no site de download (ou armazenado em um arquivo de checksums).
-- [ ] Se os hashes não corresponderem, exibir erro claro indicando que o modelo pode estar corrompido e precisa ser baixado novamente.
-- [ ] Opção para fazer isso automaticamente (se o hash esperado estiver disponível) ou manualmente (orientando o usuário a verificar no site).
 
 ## 📦 Benefícios Esperados
 
